@@ -272,9 +272,13 @@ export const createReducer = <N extends string, T extends Typenames, QP, QR, MP,
         for (const {query: queryKey, cacheKey, expiresAt = now} of queriesToInvalidate) {
           const statesByCacheKey = (newStatesByQueryKey ?? state.queries)[queryKey]
           const cacheKeysToInvalidate: (keyof typeof statesByCacheKey)[] =
-            cacheKey != null ? [cacheKey] : Object.keys(statesByCacheKey)
+            cacheKey != null ? [cacheKey] : Reflect.ownKeys(statesByCacheKey) // Reflect.ownKeys supports symbols
 
           for (const cacheKey of cacheKeysToInvalidate) {
+            if (mutable && cacheKey === '_changeKey') {
+              continue
+            }
+
             const queryState = statesByCacheKey[cacheKey]
             if (!queryState || queryState.expiresAt === expiresAt) {
               continue
