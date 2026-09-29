@@ -81,7 +81,7 @@ export const applyEntityChanges = <T extends Typenames>(
 
   let result: EntitiesMap<T> | undefined
 
-  const objectWithAllTypenames = {...changes.merge, ...changes.remove, ...changes.replace}
+  const objectWithAllTypenames = {...merge, ...remove, ...replace}
   for (const typename in objectWithAllTypenames) {
     const entitiesToMerge = merge?.[typename]
     const entitiesToReplace = replace?.[typename]

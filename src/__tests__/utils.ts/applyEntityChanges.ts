@@ -11,10 +11,10 @@ describe.each(testCaches)('%s', (_, cache, withChangeKey) => {
     utils: {applyEntityChanges},
   } = cache
 
-  test('add new entities', () => {
+  test.each(['merge', 'entities'] as const)('add new entities via %s', (field) => {
     const entitiesMap = generateTestEntitiesMap(0)
     const changes: EntityChanges<TestTypenames> = {
-      merge: generateTestEntitiesMap(2),
+      [field]: generateTestEntitiesMap(2),
     }
 
     const result = applyEntityChanges(entitiesMap, changes)
@@ -47,10 +47,10 @@ describe.each(testCaches)('%s', (_, cache, withChangeKey) => {
     )
   })
 
-  test('update entities', () => {
+  test.each(['merge', 'entities'] as const)('update entities via %s', (field) => {
     const entitiesMap = generateTestEntitiesMap(2)
     const changes: EntityChanges<TestTypenames> = {
-      merge: {
+      [field]: {
         users: {1: {name: 'User 1 updated'}},
         banks: {1: {name: 'Bank 1 updated'}},
       },
@@ -97,10 +97,10 @@ describe.each(testCaches)('%s', (_, cache, withChangeKey) => {
     )
   })
 
-  test('add, remove, update and replace entities', () => {
+  test.each(['merge', 'entities'] as const)('add, remove, update and replace entities via %s', (field) => {
     const entitiesMap = generateTestEntitiesMap(3)
     const changes: EntityChanges<TestTypenames> = {
-      merge: {
+      [field]: {
         users: {1: generateTestUser(1, true, ' updated')},
         banks: {
           1: generateTestBank('1', ' updated'),
