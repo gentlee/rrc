@@ -429,7 +429,7 @@ export const cache = createCache({
 
 #### Extended & custom fetch policy
 
-Fetch policy determines if `useQuery` fetch triggers should start fetching. They are: 1) component mount 2) cache key change (=params by default) 3) `skipFetch` change to false.
+Fetch policy determines if `useQuery` fetch triggers should start fetching. They are: 1) component mount 2) query name or cache key change (=params by default) 3) `skipFetch` change to false 4) store change.
 
 `FetchPolicy.NoCacheOrExpired` (default) skips fetching if result is already cached, but sometimes it can't determine that we already have result in some other's query result or in normalized entities cache. In that case we can use `skipFetch` parameter of a query:
 

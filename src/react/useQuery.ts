@@ -30,7 +30,7 @@ export const useQuery = <
 
   const {
     query: queryKey,
-    skipFetch = false,
+    skipFetch = queries[queryKey].skipFetch ?? globals.queries.skipFetch ?? false,
     params,
     selectorComparer,
     secondsToLive,
@@ -85,11 +85,11 @@ export const useQuery = <
         onError,
       )
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       cache,
       queryKey,
       cacheKey,
-      innerStore,
       externalStore,
       params,
       secondsToLive,
@@ -135,7 +135,7 @@ export const useQuery = <
 
     query()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queryKey, cacheKey, skipFetch])
+  }, [queryKey, cacheKey, skipFetch, externalStore])
 
   logsEnabled && logDebug('useQuery', {cacheKey, options: useQueryOptions, queryState})
 

@@ -187,6 +187,89 @@ describe.each(testCaches)('%s', (_, cache, withChangeKey) => {
     expect(selectQueryResult(store.getState(), 'getUserTtl', 0)).toBe(0)
   })
 
+  test('useQuery fetches when the provider store changes', async () => {
+    store = createReduxStore(cache)
+    const firstStore = store
+    render({query: 'getUserTtl', params: 0})
+    await act(advanceApiTimeout)
+    expect(getUser).toHaveBeenCalledTimes(1)
+
+    store = createReduxStore(cache)
+    render({query: 'getUserTtl', params: 0})
+    await act(advanceApiTimeout)
+
+    expect(getUser).toHaveBeenCalledTimes(2)
+    expect(getUser).toHaveBeenLastCalledWith(0, store)
+    expect(selectQueryResult(firstStore.getState(), 'getUserTtl', 0)).toBe(0)
+    expect(selectQueryResult(store.getState(), 'getUserTtl', 0)).toBe(0)
+  })
+
+  test.each([
+    {name: 'default', globalSkip: false, querySkip: undefined, hookSkip: undefined, skipped: false},
+    {name: 'global default', globalSkip: true, querySkip: undefined, hookSkip: undefined, skipped: true},
+    {name: 'query default', globalSkip: false, querySkip: true, hookSkip: undefined, skipped: true},
+    {
+      name: 'query false overrides global true',
+      globalSkip: true,
+      querySkip: false,
+      hookSkip: undefined,
+      skipped: false,
+    },
+    {
+      name: 'hook false overrides query true',
+      globalSkip: true,
+      querySkip: true,
+      hookSkip: false,
+      skipped: false,
+    },
+    {
+      name: 'hook true overrides query false',
+      globalSkip: false,
+      querySkip: false,
+      hookSkip: true,
+      skipped: true,
+    },
+  ])('useQuery respects skipFetch: $name', async ({globalSkip, querySkip, hookSkip, skipped}) => {
+    const localCache = createTestCache(mutableCollections)
+    localCache.config.globals.queries.skipFetch = globalSkip
+    localCache.config.queries.getUserTtl.skipFetch = querySkip
+    store = createReduxStore(localCache)
+    const {useQuery} = localCache.hooks!
+    const {result} = renderHook(() => useQuery({query: 'getUserTtl', params: 0, skipFetch: hookSkip}), {
+      wrapper,
+    })
+    await act(advanceApiTimeout)
+    expect(getUser).toHaveBeenCalledTimes(skipped ? 0 : 1)
+
+    if (skipped) {
+      act(() => {
+        const [, fetch] = result.current
+        fetch()
+      })
+      await act(advanceApiTimeout)
+      expect(getUser).toHaveBeenCalledTimes(1)
+      const [state] = result.current
+      expect(state.result).toBe(0)
+    }
+  })
+
+  test('useQuery fetches when a hook option enables a skipped query', async () => {
+    const localCache = createTestCache(mutableCollections)
+    localCache.config.globals.queries.skipFetch = true
+    store = createReduxStore(localCache)
+    const {useQuery} = localCache.hooks!
+    const {rerender} = renderHook(
+      ({skipFetch}: {skipFetch?: boolean}) => useQuery({query: 'getUserTtl', params: 0, skipFetch}),
+      {wrapper, initialProps: {skipFetch: undefined} as {skipFetch?: boolean}},
+    )
+    await act(advanceApiTimeout)
+    expect(getUser).not.toHaveBeenCalled()
+
+    rerender({skipFetch: false})
+    await act(advanceApiTimeout)
+    expect(getUser).toHaveBeenCalledTimes(1)
+  })
+
   test('fetch if no cache, success callbacks work', async () => {
     render({
       query: 'getUsers',

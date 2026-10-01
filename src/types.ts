@@ -99,7 +99,7 @@ export type Globals<T extends Typenames> = {
   /** Query options. */
   queries: {
     /** Determines when useQuery fetch triggers should start fetching. Fetch is performed if function returns true.
-     * Fetch triggers are: 1) mount 2) cache key change 3) skipFetch value change to false.
+     * Fetch triggers are: 1) mount 2) query or cache key change 3) skipFetch value change to false 4) store change.
      * @Default FetchPolicy.NoCacheOrExpired */
     fetchPolicy: (
       expired: boolean,
@@ -107,7 +107,7 @@ export type Globals<T extends Typenames> = {
       state: QueryState<T, unknown, unknown>,
       store: AnyStore,
     ) => boolean
-    /** Disables any fetches when set to true. Triggers fetch when changed to false. @Default false */
+    /** Disables automatic useQuery fetches when true. Manual fetch calls bypass this setting. Hook options override query defaults, which override global defaults. Triggers automatic fetch when changed to false. @Default false */
     skipFetch: boolean
     /** If set, this value updates expiresAt value of query state when query result is received. @Default undefined */
     secondsToLive?: number
