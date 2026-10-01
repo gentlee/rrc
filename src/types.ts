@@ -158,7 +158,7 @@ export type CacheState<T extends Typenames, QP, QR, MP, MR> = {
 export type CacheClient<T extends Typenames, QP, QR, MP, MR> = {
   query: <QK extends keyof (QP & QR)>(
     options: QueryOptions<T, QP, QR, QK>,
-  ) => Promise<QueryResult<QK extends keyof (QP | QR) ? QP[QK] : never>>
+  ) => Promise<QueryResult<QK extends keyof (QP | QR) ? QR[QK] : never>>
   mutate: <MK extends keyof (MP & MR)>(
     options: MutateOptions<T, MP, MR, MK>,
   ) => Promise<MutationResult<MK extends keyof (MP | MR) ? MR[MK] : never>>
@@ -171,7 +171,7 @@ export type QueryInfo<T extends Typenames = Typenames, P = unknown, R = unknown>
 > & {
   query: NormalizedQuery<T, P, R>
   /** Determines when useQuery fetch triggers should start fetching. Fetch is performed if function returns true.
-   * Fetch triggers are: 1) mount 2) cache key change 3) skipFetch value change to false.
+   * Fetch triggers are: 1) mount 2) query or cache key change 3) skipFetch value change to false 4) store change.
    * @Default FetchPolicy.NoCacheOrExpired */
   fetchPolicy?: (expired: boolean, params: P, queryState: QueryState<T, P, R>, store: AnyStore) => boolean
   /** Merges results before saving to the store. Default implementation is using the latest result. */

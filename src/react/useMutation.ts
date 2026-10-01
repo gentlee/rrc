@@ -23,7 +23,7 @@ export const useMutation = <
   options: Omit<MutateOptions<T, MP, MR, MK>, 'params'>,
 ) => {
   type P = MK extends keyof (MP | MR) ? MP[MK] : never
-  type R = MK extends keyof (MP | MR) ? MP[MK] : never
+  type R = MK extends keyof (MP | MR) ? MR[MK] : never
 
   const {config, extensions} = cache
 
@@ -71,7 +71,6 @@ export const useMutation = <
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mutationKey, innerStore])
 
-  // @ts-expect-error TODO fix types
   const mutationState: MutationState<T, P, R> = useSelector(mutationStateSelector) ?? EMPTY_OBJECT
 
   config.options.logsEnabled && logDebug('useMutation', {options, mutationState})
