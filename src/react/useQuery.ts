@@ -85,13 +85,13 @@ export const useQuery = <
         onError,
       )
     },
+    // No params here to stabilize query, but keeping cacheKey.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       cache,
       queryKey,
       cacheKey,
       externalStore,
-      params,
       secondsToLive,
       getCacheKey,
       mergeResults,

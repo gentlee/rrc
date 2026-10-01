@@ -98,7 +98,7 @@ describe.each(testCaches)('%s', (_, cache, withChangeKey) => {
 
   const wrapper = ({children}: {children: React.ReactNode}) => <Provider store={store}>{children}</Provider>
 
-  test('useQuery uses passed params, secondsToLive, mergeResults, onSuccess and onCompleted', async () => {
+  test('useQuery updates fetch when secondsToLive, mergeResults and callbacks change', async () => {
     const initialSuccess = jest.fn()
     const initialCompleted = jest.fn()
     const initialMerge = jest.fn(() => ({items: [0], page: 1}))
@@ -119,6 +119,7 @@ describe.each(testCaches)('%s', (_, cache, withChangeKey) => {
         },
       },
     )
+    const [, initialFetch] = result.current
     await act(advanceApiTimeout)
     expect(getUsers).toHaveBeenCalledTimes(1)
 
@@ -131,9 +132,10 @@ describe.each(testCaches)('%s', (_, cache, withChangeKey) => {
     })
     await act(advanceApiTimeout)
     expect(getUsers).toHaveBeenCalledTimes(1)
+    const [, fetch] = result.current
+    expect(fetch).not.toBe(initialFetch)
 
     act(() => {
-      const [, fetch] = result.current
       fetch()
     })
     await act(advanceApiTimeout)
@@ -149,6 +151,56 @@ describe.each(testCaches)('%s', (_, cache, withChangeKey) => {
     expect(cache.selectors.selectQueryExpiresAt(store.getState(), 'getUsers', 'feed')).toBe(
       Date.now() + 30 * 1000,
     )
+  })
+
+  test('useQuery updates fetch when the cache key changes and accepts explicit params', async () => {
+    const {result, rerender} = renderHook(
+      ({id}) => useQuery({query: 'getUserTtl', params: id, skipFetch: true}),
+      {wrapper, initialProps: {id: 0}},
+    )
+    const [, initialFetch] = result.current
+    rerender({id: 1})
+    const [, fetch] = result.current
+    expect(fetch).not.toBe(initialFetch)
+    act(() => {
+      fetch()
+    })
+    await act(advanceApiTimeout)
+    expect(getUser).toHaveBeenLastCalledWith(1, store)
+    act(() => {
+      fetch({params: 2})
+    })
+    await act(advanceApiTimeout)
+    expect(getUser).toHaveBeenLastCalledWith(2, store)
+    expect(selectQueryResult(store.getState(), 'getUserTtl', 2)).toBe(2)
+    expect(result.current[1]).toBe(fetch)
+  })
+
+  test('useQuery keeps fetch stable for the same cache key and accepts updated params explicitly', async () => {
+    const {result, rerender} = renderHook(
+      ({page}) => useQuery({query: 'getUsers', params: {page}, skipFetch: true}),
+      {wrapper, initialProps: {page: 1}},
+    )
+    const [, fetch] = result.current
+    rerender({page: 1})
+    expect(result.current[1]).toBe(fetch)
+    rerender({page: 2})
+    expect(result.current[1]).toBe(fetch)
+    expect(getUsers).not.toHaveBeenCalled()
+
+    act(() => {
+      fetch()
+    })
+    await act(advanceApiTimeout)
+    expect(getUsers).toHaveBeenLastCalledWith({page: 1}, store)
+
+    act(() => {
+      fetch({params: {page: 2}})
+    })
+    await act(advanceApiTimeout)
+    expect(getUsers).toHaveBeenLastCalledWith({page: 2}, store)
+    expect(getUsers).toHaveBeenCalledTimes(2)
+    expect(result.current[1]).toBe(fetch)
   })
 
   test('useQuery uses passed onError and onCompleted', async () => {
