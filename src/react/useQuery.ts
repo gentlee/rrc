@@ -33,6 +33,11 @@ export const useQuery = <
     skipFetch = false,
     params,
     selectorComparer,
+    secondsToLive,
+    mergeResults,
+    onCompleted,
+    onSuccess,
+    onError,
     fetchPolicy = queries[queryKey].fetchPolicy ?? globals.queries.fetchPolicy,
   } = useQueryOptions
 
@@ -61,7 +66,6 @@ export const useQuery = <
   const query = useCallback(
     async (options?: Partial<Pick<QueryOptions<T, QP, QR, QK>, 'params' | 'onlyIfExpired'>>) => {
       const paramsPassed = options && 'params' in options
-      const {secondsToLive, mergeResults, onCompleted, onSuccess, onError} = useQueryOptions
       return await queryImpl(
         'useQuery.query',
         innerStore,
@@ -81,8 +85,20 @@ export const useQuery = <
         onError,
       )
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [innerStore, externalStore, queryKey, cacheKey],
+    [
+      cache,
+      queryKey,
+      cacheKey,
+      innerStore,
+      externalStore,
+      params,
+      secondsToLive,
+      getCacheKey,
+      mergeResults,
+      onCompleted,
+      onError,
+      onSuccess,
+    ],
   )
 
   /** Query state */
@@ -119,7 +135,7 @@ export const useQuery = <
 
     query()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cacheKey, skipFetch])
+  }, [queryKey, cacheKey, skipFetch])
 
   logsEnabled && logDebug('useQuery', {cacheKey, options: useQueryOptions, queryState})
 

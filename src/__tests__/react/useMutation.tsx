@@ -1,12 +1,12 @@
-import {act, render as renderImpl} from '@testing-library/react'
+import {act, render as renderImpl, renderHook} from '@testing-library/react'
 import React from 'react'
 import {Provider} from 'react-redux'
 
-import {assertEventLog, generateTestEntitiesMap, generateTestUser, logEvent} from '../testing/api/utils'
-import {testCaches} from '../testing/redux/cache'
-import {EMPTY_STATE} from '../testing/redux/store'
-import {createReduxStore} from '../testing/redux/store'
-import {advanceApiTimeout, advanceHalfApiTimeout} from '../testing/utils'
+import {assertEventLog, generateTestEntitiesMap, generateTestUser, logEvent} from '../../testing/api/utils'
+import {testCaches} from '../../testing/redux/cache'
+import {EMPTY_STATE} from '../../testing/redux/store'
+import {createReduxStore} from '../../testing/redux/store'
+import {advanceApiTimeout, advanceHalfApiTimeout} from '../../testing/utils'
 
 describe.each(testCaches)('%s', (_, cache, withChangeKey) => {
   const {
@@ -32,6 +32,103 @@ describe.each(testCaches)('%s', (_, cache, withChangeKey) => {
 
   beforeEach(() => {
     store = createReduxStore(cache, true)
+  })
+
+  const wrapper = ({children}: {children: React.ReactNode}) => <Provider store={store}>{children}</Provider>
+
+  test.each(['onSuccess', 'onCompleted', 'onError'] as const)(
+    'useMutation keeps selector and abort stable when passed %s changes',
+    (callback) => {
+      const selector = jest.spyOn(cache.selectors, 'selectMutationState')
+      try {
+        const callbacks = {onSuccess: jest.fn(), onCompleted: jest.fn(), onError: jest.fn(() => true)}
+        const {result, rerender} = renderHook(
+          (callbacks) => useMutation({mutation: 'updateUser', ...callbacks}),
+          {wrapper, initialProps: callbacks},
+        )
+        const [initialMutate, , initialAbort] = result.current
+        const selectorCalls = selector.mock.calls.length
+
+        rerender({...callbacks, [callback]: jest.fn(() => true)})
+
+        const [currentMutate, , currentAbort] = result.current
+        expect(currentMutate).not.toBe(initialMutate)
+        expect(currentAbort).toBe(initialAbort)
+        expect(selector).toHaveBeenCalledTimes(selectorCalls)
+
+        act(() => {
+          store.dispatch(cache.actions.updateMutationStateAndEntities('updateUser', {result: 0}))
+        })
+
+        const [mutateAfterUpdate, state, abortAfterUpdate] = result.current
+        expect(state.result).toBe(0)
+        expect(mutateAfterUpdate).toBe(currentMutate)
+        expect(abortAfterUpdate).toBe(currentAbort)
+      } finally {
+        selector.mockRestore()
+      }
+    },
+  )
+
+  test('useMutation uses passed onSuccess and onCompleted for each invocation', async () => {
+    const initialSuccess = jest.fn()
+    const initialCompleted = jest.fn()
+    const currentSuccess = jest.fn()
+    const currentCompleted = jest.fn()
+    const params = {id: 0, name: 'Updated'}
+    const {result, rerender} = renderHook(
+      ({onSuccess, onCompleted}) => useMutation({mutation: 'updateUser', onSuccess, onCompleted}),
+      {wrapper, initialProps: {onSuccess: initialSuccess, onCompleted: initialCompleted}},
+    )
+
+    act(() => {
+      const [mutate] = result.current
+      mutate(params)
+    })
+    rerender({onSuccess: currentSuccess, onCompleted: currentCompleted})
+    await act(advanceApiTimeout)
+    expect(initialSuccess).toHaveBeenCalledTimes(1)
+    expect(initialCompleted).toHaveBeenCalledTimes(1)
+    expect(currentSuccess).not.toHaveBeenCalled()
+    expect(currentCompleted).not.toHaveBeenCalled()
+
+    act(() => {
+      const [mutate] = result.current
+      mutate(params)
+    })
+    await act(advanceApiTimeout)
+    expect(initialSuccess).toHaveBeenCalledTimes(1)
+    expect(initialCompleted).toHaveBeenCalledTimes(1)
+    expect(currentSuccess).toHaveBeenCalledWith(expect.objectContaining({result: 0}), params, store)
+    expect(currentCompleted).toHaveBeenCalledWith(
+      expect.objectContaining({result: 0}),
+      undefined,
+      params,
+      store,
+    )
+  })
+
+  test('useMutation uses passed onError and onCompleted', async () => {
+    const initialError = jest.fn(() => true)
+    const initialCompleted = jest.fn()
+    const currentError = jest.fn(() => true)
+    const currentCompleted = jest.fn()
+    const {result, rerender} = renderHook(
+      ({onError, onCompleted}) => useMutation({mutation: 'mutationWithError', onError, onCompleted}),
+      {wrapper, initialProps: {onError: initialError, onCompleted: initialCompleted}},
+    )
+
+    rerender({onError: currentError, onCompleted: currentCompleted})
+    act(() => {
+      const [mutate] = result.current
+      mutate(undefined)
+    })
+    await act(advanceApiTimeout)
+
+    expect(initialError).not.toHaveBeenCalled()
+    expect(initialCompleted).not.toHaveBeenCalled()
+    expect(currentError).toHaveBeenCalledWith(new Error('Test error'), undefined, store)
+    expect(currentCompleted).toHaveBeenCalledWith(undefined, new Error('Test error'), undefined, store)
   })
 
   test('should be able to abort started mutation, mutation selectors work', async () => {

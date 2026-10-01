@@ -1,4 +1,4 @@
-import {useMemo} from 'react'
+import {useCallback, useMemo} from 'react'
 
 import {mutate as mutateImpl} from '../mutate'
 import {MutateOptions, MutationState, Typenames} from '../types'
@@ -25,13 +25,7 @@ export const useMutation = <
   type P = MK extends keyof (MP | MR) ? MP[MK] : never
   type R = MK extends keyof (MP | MR) ? MP[MK] : never
 
-  const {
-    config,
-    abortControllers,
-    selectors: {selectMutationState},
-    actions: {updateMutationStateAndEntities},
-    extensions,
-  } = cache
+  const {config, extensions} = cache
 
   const {mutation: mutationKey, onCompleted, onSuccess, onError} = options
 
@@ -40,10 +34,8 @@ export const useMutation = <
   const innerStore = useStore()
   const externalStore = useExternalStore()
 
-  // Using single useMemo for better performance
-  const [mutationStateSelector, mutate, abort] = useMemo(() => {
-    const mutationStateSelectorFromUseMutation = (state: unknown) => selectMutationState(state, mutationKey)
-    const mutateFromUseMutation = async (params: P) => {
+  const mutate = useCallback(
+    async (params: P) => {
       return mutateImpl(
         'useMutation.mutate',
         innerStore,
@@ -56,21 +48,28 @@ export const useMutation = <
         onSuccess,
         onError,
       )
-    }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [mutationKey, innerStore, externalStore, onCompleted, onSuccess, onError],
+  )
+
+  const [mutationStateSelector, abort] = useMemo(() => {
+    const mutationStateSelectorFromUseMutation = (state: unknown) =>
+      cache.selectors.selectMutationState(state, mutationKey)
     const abortFromUseMutation = () => {
-      const abortController = abortControllers.get(innerStore)?.[mutationKey]
+      const abortController = cache.abortControllers.get(innerStore)?.[mutationKey]
       if (abortController === undefined || abortController.signal.aborted) {
         return false
       }
       abortController.abort()
       innerStore.dispatch(
-        updateMutationStateAndEntities(mutationKey as keyof (MP | MR), {loading: undefined}),
+        cache.actions.updateMutationStateAndEntities(mutationKey as keyof (MP | MR), {loading: undefined}),
       )
       return true
     }
-    return [mutationStateSelectorFromUseMutation, mutateFromUseMutation, abortFromUseMutation]
+    return [mutationStateSelectorFromUseMutation, abortFromUseMutation] as const
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mutationKey, innerStore, externalStore])
+  }, [mutationKey, innerStore])
 
   // @ts-expect-error TODO fix types
   const mutationState: MutationState<T, P, R> = useSelector(mutationStateSelector) ?? EMPTY_OBJECT

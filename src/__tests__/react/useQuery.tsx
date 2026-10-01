@@ -1,15 +1,15 @@
-import {act, render as renderImpl} from '@testing-library/react'
+import {act, render as renderImpl, renderHook} from '@testing-library/react'
 import React, {Key, useRef} from 'react'
 import {Provider} from 'react-redux'
 import {createStore} from 'redux'
 
-import {getUser, getUsers} from '../testing/api/mocks'
-import {assertEventLog, clearEventLog, generateTestEntitiesMap, logEvent} from '../testing/api/utils'
-import {createTestCache, testCaches} from '../testing/redux/cache'
-import {EMPTY_STATE} from '../testing/redux/store'
-import {createReduxStore} from '../testing/redux/store'
-import {advanceApiTimeout, advanceHalfApiTimeout, TTL_TIMEOUT} from '../testing/utils'
-import {createStateComparer, FetchPolicy} from '../utilsAndConstants'
+import {getUser, getUsers} from '../../testing/api/mocks'
+import {assertEventLog, clearEventLog, generateTestEntitiesMap, logEvent} from '../../testing/api/utils'
+import {createTestCache, testCaches} from '../../testing/redux/cache'
+import {EMPTY_STATE} from '../../testing/redux/store'
+import {createReduxStore} from '../../testing/redux/store'
+import {advanceApiTimeout, advanceHalfApiTimeout, TTL_TIMEOUT} from '../../testing/utils'
+import {createStateComparer, FetchPolicy} from '../../utilsAndConstants'
 
 describe.each(testCaches)('%s', (_, cache, withChangeKey) => {
   const {
@@ -95,6 +95,97 @@ describe.each(testCaches)('%s', (_, cache, withChangeKey) => {
   })
 
   // Tests
+
+  const wrapper = ({children}: {children: React.ReactNode}) => <Provider store={store}>{children}</Provider>
+
+  test('useQuery uses passed params, secondsToLive, mergeResults, onSuccess and onCompleted', async () => {
+    const initialSuccess = jest.fn()
+    const initialCompleted = jest.fn()
+    const initialMerge = jest.fn(() => ({items: [0], page: 1}))
+    const currentSuccess = jest.fn()
+    const currentCompleted = jest.fn()
+    const currentMerge = jest.fn(() => ({items: [42], page: 2}))
+    const {result, rerender} = renderHook(
+      ({page, secondsToLive, onSuccess, onCompleted, mergeResults}) =>
+        useQuery({query: 'getUsers', params: {page}, secondsToLive, onSuccess, onCompleted, mergeResults}),
+      {
+        wrapper,
+        initialProps: {
+          page: 1,
+          secondsToLive: 1,
+          onSuccess: initialSuccess,
+          onCompleted: initialCompleted,
+          mergeResults: initialMerge,
+        },
+      },
+    )
+    await act(advanceApiTimeout)
+    expect(getUsers).toHaveBeenCalledTimes(1)
+
+    rerender({
+      page: 2,
+      secondsToLive: 30,
+      onSuccess: currentSuccess,
+      onCompleted: currentCompleted,
+      mergeResults: currentMerge,
+    })
+    await act(advanceApiTimeout)
+    expect(getUsers).toHaveBeenCalledTimes(1)
+
+    act(() => {
+      const [, fetch] = result.current
+      fetch()
+    })
+    await act(advanceApiTimeout)
+
+    expect(getUsers).toHaveBeenLastCalledWith({page: 2}, store)
+    expect(initialSuccess).toHaveBeenCalledTimes(1)
+    expect(initialCompleted).toHaveBeenCalledTimes(1)
+    expect(initialMerge).toHaveBeenCalledTimes(1)
+    expect(currentSuccess).toHaveBeenCalledWith(expect.any(Object), {page: 2}, store)
+    expect(currentCompleted).toHaveBeenCalledWith(expect.any(Object), undefined, {page: 2}, store)
+    expect(currentMerge).toHaveBeenCalledTimes(1)
+    expect(result.current[0].result).toStrictEqual({items: [42], page: 2})
+    expect(cache.selectors.selectQueryExpiresAt(store.getState(), 'getUsers', 'feed')).toBe(
+      Date.now() + 30 * 1000,
+    )
+  })
+
+  test('useQuery uses passed onError and onCompleted', async () => {
+    const initialError = jest.fn(() => true)
+    const initialCompleted = jest.fn()
+    const currentError = jest.fn(() => true)
+    const currentCompleted = jest.fn()
+    const {result, rerender} = renderHook(
+      ({onError, onCompleted}) =>
+        useQuery({query: 'queryWithError', params: undefined, skipFetch: true, onError, onCompleted}),
+      {wrapper, initialProps: {onError: initialError, onCompleted: initialCompleted}},
+    )
+
+    rerender({onError: currentError, onCompleted: currentCompleted})
+    act(() => {
+      const [, fetch] = result.current
+      fetch()
+    })
+    await act(advanceApiTimeout)
+
+    expect(initialError).not.toHaveBeenCalled()
+    expect(initialCompleted).not.toHaveBeenCalled()
+    expect(currentError).toHaveBeenCalledWith(new Error('Test error'), undefined, store)
+    expect(currentCompleted).toHaveBeenCalledWith(undefined, new Error('Test error'), undefined, store)
+  })
+
+  test('useQuery fetches when query changes with the same cache key', async () => {
+    render({query: 'getUser', params: 0})
+    await act(advanceApiTimeout)
+    expect(getUser).toHaveBeenCalledTimes(1)
+
+    render({query: 'getUserTtl', params: 0})
+    await act(advanceApiTimeout)
+
+    expect(getUser).toHaveBeenCalledTimes(2)
+    expect(selectQueryResult(store.getState(), 'getUserTtl', 0)).toBe(0)
+  })
 
   test('fetch if no cache, success callbacks work', async () => {
     render({
