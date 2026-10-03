@@ -2,7 +2,6 @@ import type {
   Cache,
   CacheState,
   EntityChanges,
-  Key,
   MutateOptions,
   MutationResult,
   MutationState,
@@ -32,7 +31,7 @@ export declare const initializeForRedux: <
       | {
           type: `@rrc/${N}/updateQueryStateAndEntities`
           queryKey: keyof QP & keyof QR
-          queryCacheKey: Key
+          queryCacheKey: PropertyKey
           state: Partial<QueryState<T, QP[keyof QP & keyof QR], QR[keyof QP & keyof QR]>> | undefined
           entityChanges: EntityChanges<T> | undefined
         }
@@ -50,7 +49,7 @@ export declare const initializeForRedux: <
           type: `@rrc/${N}/invalidateQuery`
           queries: {
             query: keyof QP & keyof QR
-            cacheKey?: Key
+            cacheKey?: PropertyKey
             expiresAt?: number
           }[]
         }
@@ -58,7 +57,7 @@ export declare const initializeForRedux: <
           type: `@rrc/${N}/clearQueryState`
           queries: {
             query: keyof QP & keyof QR
-            cacheKey?: Key
+            cacheKey?: PropertyKey
           }[]
         }
       | {
@@ -75,13 +74,13 @@ export declare const initializeForRedux: <
     updateQueryStateAndEntities: {
       <K extends keyof QP & keyof QR>(
         queryKey: K,
-        queryCacheKey: Key,
+        queryCacheKey: PropertyKey,
         state?: Partial<QueryState<T, QP[K], QR[K]>> | undefined,
         entityChanges?: EntityChanges<T> | undefined,
       ): {
         type: `@rrc/${N}/updateQueryStateAndEntities`
         queryKey: K
-        queryCacheKey: Key
+        queryCacheKey: PropertyKey
         state: Partial<QueryState<T, QP[K], QR[K]>> | undefined
         entityChanges: EntityChanges<T> | undefined
       }
@@ -114,14 +113,14 @@ export declare const initializeForRedux: <
       <K extends keyof QP & keyof QR>(
         queries: {
           query: K
-          cacheKey?: Key
+          cacheKey?: PropertyKey
           expiresAt?: number
         }[],
       ): {
         type: `@rrc/${N}/invalidateQuery`
         queries: {
           query: K
-          cacheKey?: Key
+          cacheKey?: PropertyKey
           expiresAt?: number
         }[]
       }
@@ -133,13 +132,13 @@ export declare const initializeForRedux: <
       <K extends keyof QP & keyof QR>(
         queries: {
           query: K
-          cacheKey?: Key
+          cacheKey?: PropertyKey
         }[],
       ): {
         type: `@rrc/${N}/clearQueryState`
         queries: {
           query: K
-          cacheKey?: Key
+          cacheKey?: PropertyKey
         }[]
       }
       type: `@rrc/${N}/clearQueryState`

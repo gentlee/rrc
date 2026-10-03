@@ -3,8 +3,6 @@
 import type {Actions} from './createActions'
 import {createCache} from './createCache'
 
-export type Key = string | number | symbol
-
 export type Mutable = {
   /**
    * Used only when mutable cache enabled. Always incremented when collection changed by reducer to allow subscribe on changes.
@@ -13,7 +11,7 @@ export type Mutable = {
   _changeKey?: number
 }
 
-export type Dict<T> = Record<Key, T> & Mutable
+export type Dict<T> = Record<PropertyKey, T> & Mutable
 
 export type OptionalPartial<T, K extends keyof T> = Partial<{[A in K]: Partial<T[A]>}> & Omit<T, K>
 
@@ -111,7 +109,7 @@ export type Globals<T extends Typenames> = {
     skipFetch: boolean
     /** If set, this value updates expiresAt value of query state when query result is received. @Default undefined */
     secondsToLive?: number
-    /** Either comparer function, or array of keys to subscribe by useQuery's useSelector. @Default compares result, loading, params, error. */
+    /** Either comparer function, or array of keys to subscribe by useQuery's useSelector. @Default compares result, loading, params, error. @Zustand Use `createWithEqualityFn` for the store creation to support that option. */
     selectorComparer?: QueryStateComparer<T, unknown, unknown> | (keyof QueryState)[] // TODO add keys array only for creating cache config
   }
 }
@@ -141,7 +139,7 @@ export type PartialEntitiesMap<T extends Typenames> = {[K in keyof T]?: Dict<Par
 
 export type EntitiesMap<T extends Typenames> = {[K in keyof T]?: Dict<T[K]>}
 
-export type EntityIds<T extends Typenames> = {[K in keyof T]?: Key[] | Set<Key>}
+export type EntityIds<T extends Typenames> = {[K in keyof T]?: PropertyKey[] | Set<PropertyKey>}
 
 export type CacheState<T extends Typenames, QP, QR, MP, MR> = {
   entities: EntitiesMap<T> & Mutable
@@ -186,7 +184,7 @@ export type QueryInfo<T extends Typenames = Typenames, P = unknown, R = unknown>
    * Default implementation uses `String()` or `JSON.stringify` depending on type.
    * It is recommended to override it when default implementation is not optimal or when keys in params object can be sorted in random order etc.
    */
-  getCacheKey?: (params: P) => Key
+  getCacheKey?: (params: P) => PropertyKey
   /** Called after fetch completed either successfully or not. */
   onCompleted?: (
     response: NormalizedQueryResponse<T, R> | undefined,
@@ -198,7 +196,7 @@ export type QueryInfo<T extends Typenames = Typenames, P = unknown, R = unknown>
   onSuccess?: (response: NormalizedQueryResponse<T, R>, params: P, store: AnyStore) => void
   /** Called after fetch finished with error. Should return true if error was handled and does not require global onError handling. */
   onError?: (error: unknown, params: P, store: AnyStore) => boolean | void | null | undefined
-  /** Either comparer function, or array of keys to subscribe by useQuery's useSelector. Default compares params, result, loading, error. */
+  /** Either comparer function, or array of keys to subscribe by useQuery's useSelector. @Default compares params, result, loading, error. @Zustand Use `createWithEqualityFn` for the store creation to support that option. */
   selectorComparer?: QueryStateComparer<T, P, R> | (keyof QueryState)[] // TODO add keys array only for creating cache config
 }
 

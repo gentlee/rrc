@@ -15,7 +15,6 @@ import type {
   EntityChanges,
   EntityIds,
   Globals,
-  Key,
   Mutable,
   MutateOptions,
   Mutation,

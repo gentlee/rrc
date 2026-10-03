@@ -1,4 +1,4 @@
-import type {AnyStore, Key, QueryResult, Typenames} from './types'
+import type {AnyStore, QueryResult, Typenames} from './types'
 import {CachePrivate, InnerStore} from './typesPrivate'
 import {logDebug, noop} from './utilsAndConstants'
 
@@ -17,7 +17,7 @@ export const query = async <
   externalStore: AnyStore,
   cache: Pick<CachePrivate<N, SK, T, QP, QR, MP, MR>, 'config' | 'actions' | 'selectors'>,
   queryKey: QK,
-  cacheKey: Key,
+  cacheKey: PropertyKey,
   params: QK extends keyof (QP | QR) ? QP[QK] : never,
   onlyIfExpired: boolean | undefined,
   skipFetch: boolean | undefined,

@@ -1,7 +1,7 @@
 import {Actions} from './createActions'
 import {createReducer} from './createReducer'
 import {StoreHooks} from './react'
-import {AnyStore, Cache, CacheState, Key, ReduxStoreLike, Typenames, ZustandStoreLike} from './types'
+import {AnyStore, Cache, CacheState, ReduxStoreLike, Typenames, ZustandStoreLike} from './types'
 
 /** Inner logic works with Redux-like stores. */
 export type InnerStore<S = unknown> = ReduxStoreLike<S>
@@ -17,7 +17,7 @@ export type CachePrivate<
 > = Cache<N, SK, T, QP, QR, MP, MR> & {
   actions: Actions<N, T, QP, QR, MP, MR>
   reducer: ReturnType<typeof createReducer<N, T, QP, QR, MP, MR>>
-  abortControllers: WeakMap<InnerStore, Record<Key, AbortController>>
+  abortControllers: WeakMap<InnerStore, Record<PropertyKey, AbortController>>
   utils: Cache<N, SK, T, QP, QR, MP, MR>['utils'] & {
     getRootState: (cacheState: CacheState<T, QP, QR, MP, MR>) => unknown
   }

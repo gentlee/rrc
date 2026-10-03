@@ -56,7 +56,7 @@ const defaultGetCacheKey = (params) => {
 }
 exports.defaultGetCacheKey = defaultGetCacheKey
 const applyEntityChanges = (entities, changes, options) => {
-  var _a, _b, _c
+  var _a, _b
   if (changes.merge && changes.entities) {
     ;(0, exports.logWarn)('applyEntityChanges', 'merge and entities should not be both set')
   }
@@ -67,19 +67,18 @@ const applyEntityChanges = (entities, changes, options) => {
   const mutable = options.mutableCollections
   const deepEqual = options.deepComparisonEnabled ? exports.optionalUtils.deepEqual : undefined
   let result
-  const objectWithAllTypenames = Object.assign(
-    Object.assign(Object.assign({}, changes.merge), changes.remove),
-    changes.replace,
-  )
+  const objectWithAllTypenames = Object.assign(Object.assign(Object.assign({}, merge), remove), replace)
   for (const typename in objectWithAllTypenames) {
     const entitiesToMerge = merge === null || merge === void 0 ? void 0 : merge[typename]
     const entitiesToReplace = replace === null || replace === void 0 ? void 0 : replace[typename]
     const entitiesToRemove = remove === null || remove === void 0 ? void 0 : remove[typename]
-    if (
-      !entitiesToMerge &&
-      !entitiesToReplace &&
-      !(entitiesToRemove === null || entitiesToRemove === void 0 ? void 0 : entitiesToRemove.length)
-    ) {
+    const entitiesToRemoveLength =
+      entitiesToRemove === undefined
+        ? 0
+        : Array.isArray(entitiesToRemove)
+          ? entitiesToRemove.length
+          : entitiesToRemove.size
+    if (!entitiesToMerge && !entitiesToReplace && !entitiesToRemoveLength) {
       continue
     }
     if (options.additionalValidation) {
@@ -98,11 +97,7 @@ const applyEntityChanges = (entities, changes, options) => {
         _b !== void 0
           ? _b
           : 0) +
-        ((_c =
-          entitiesToRemove === null || entitiesToRemove === void 0 ? void 0 : entitiesToRemove.length) !==
-          null && _c !== void 0
-          ? _c
-          : 0)
+        entitiesToRemoveLength
       if (totalKeysInResponse !== 0 && idsSet.size !== totalKeysInResponse) {
         ;(0, exports.logWarn)(
           'applyEntityChanges',

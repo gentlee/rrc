@@ -110,29 +110,42 @@ const query = (
       return {cancelled: 'not-expired', result: queryStateOnStart.result}
     }
     const {updateQueryStateAndEntities} = actions
-    const fetchPromise = queries[queryKey].query(params, externalStore)
-    innerStore.dispatch(
-      updateQueryStateAndEntities(queryKey, cacheKey, {
-        loading: fetchPromise,
-        params,
-      }),
-    )
-    logsEnabled &&
-      (0, utilsAndConstants_1.logDebug)(`${logTag} started`, {
-        queryKey,
-        params,
-        cacheKey,
-        queryStateOnStart,
-        onlyIfExpired,
-      })
+    let fetchPromise
     let response
+    let error
     try {
-      response = yield fetchPromise
-    } catch (error) {
+      fetchPromise = queries[queryKey].query(params, externalStore)
+    } catch (e) {
+      error = e
+    }
+    if (!error) {
+      innerStore.dispatch(
+        updateQueryStateAndEntities(queryKey, cacheKey, {
+          loading: fetchPromise,
+          params,
+          error,
+        }),
+      )
+      logsEnabled &&
+        (0, utilsAndConstants_1.logDebug)(`${logTag} started`, {
+          queryKey,
+          params,
+          cacheKey,
+          queryStateOnStart,
+          onlyIfExpired,
+        })
+      try {
+        response = yield fetchPromise
+      } catch (e) {
+        error = e
+      }
+    }
+    if (error) {
       innerStore.dispatch(
         updateQueryStateAndEntities(queryKey, cacheKey, {
           error,
           loading: undefined,
+          params,
         }),
       )
       if (!(onError === null || onError === void 0 ? void 0 : onError(error, params, externalStore))) {
@@ -145,30 +158,33 @@ const query = (
         : onCompleted(undefined, error, params, externalStore)
       return {error, result: selectQueryResult(innerStore.getState(), queryKey, cacheKey)}
     }
-    const newState = {
-      error: undefined,
-      loading: undefined,
-      expiresAt:
-        (_c = response.expiresAt) !== null && _c !== void 0
-          ? _c
-          : secondsToLive != null
-            ? Date.now() + secondsToLive * 1000
-            : undefined,
-      result: mergeResults
-        ? mergeResults(
-            selectQueryResult(innerStore.getState(), queryKey, cacheKey),
-            response,
-            params,
-            externalStore,
-          )
-        : response.result,
+    if (response) {
+      const newState = {
+        error: undefined,
+        loading: undefined,
+        expiresAt:
+          (_c = response.expiresAt) !== null && _c !== void 0
+            ? _c
+            : secondsToLive != null
+              ? Date.now() + secondsToLive * 1000
+              : undefined,
+        result: mergeResults
+          ? mergeResults(
+              selectQueryResult(innerStore.getState(), queryKey, cacheKey),
+              response,
+              params,
+              externalStore,
+            )
+          : response.result,
+      }
+      innerStore.dispatch(updateQueryStateAndEntities(queryKey, cacheKey, newState, response))
+      onSuccess === null || onSuccess === void 0 ? void 0 : onSuccess(response, params, externalStore)
+      onCompleted === null || onCompleted === void 0
+        ? void 0
+        : onCompleted(response, undefined, params, externalStore)
+      return {result: newState === null || newState === void 0 ? void 0 : newState.result}
     }
-    innerStore.dispatch(updateQueryStateAndEntities(queryKey, cacheKey, newState, response))
-    onSuccess === null || onSuccess === void 0 ? void 0 : onSuccess(response, params, externalStore)
-    onCompleted === null || onCompleted === void 0
-      ? void 0
-      : onCompleted(response, undefined, params, externalStore)
-    return {result: newState === null || newState === void 0 ? void 0 : newState.result}
+    throw new Error(`${logTag}: both error and response are not defined`)
   })
 exports.query = query
 const catchAndReturn = (x) => x

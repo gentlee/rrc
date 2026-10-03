@@ -231,8 +231,11 @@ export const createReducer = (actions, queryKeys, cacheOptions) => {
               ? newStatesByQueryKey
               : state.queries
           )[queryKey]
-          const cacheKeysToInvalidate = cacheKey != null ? [cacheKey] : Object.keys(statesByCacheKey)
+          const cacheKeysToInvalidate = cacheKey != null ? [cacheKey] : Reflect.ownKeys(statesByCacheKey)
           for (const cacheKey of cacheKeysToInvalidate) {
+            if (mutable && cacheKey === '_changeKey') {
+              continue
+            }
             const queryState = statesByCacheKey[cacheKey]
             if (!queryState || queryState.expiresAt === expiresAt) {
               continue

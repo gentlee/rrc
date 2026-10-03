@@ -33,7 +33,7 @@ export declare const useMutation: <
   MutationState<
     T,
     MK extends keyof MP & keyof MR ? MP[MK] : never,
-    MK extends keyof MP & keyof MR ? MP[MK] : never
+    MK extends keyof MP & keyof MR ? MR[MK] : never
   >,
   () => boolean,
 ]

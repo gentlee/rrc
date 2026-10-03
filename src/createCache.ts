@@ -16,7 +16,6 @@ import type {
   EntityChanges,
   EntityIds,
   Globals,
-  Key,
   Mutable,
   MutateOptions,
   Mutation,
@@ -85,7 +84,7 @@ export const withTypenames = <WT extends Typenames = Typenames>() => {
         ? CacheState<T, QP, QR, MP, MR>
         : {[key in SK]: CacheState<T, QP, QR, MP, MR>}
 
-      const abortControllers = new WeakMap<InnerStore, Record<Key, AbortController>>()
+      const abortControllers = new WeakMap<InnerStore, Record<PropertyKey, AbortController>>()
 
       // Provide all optional fields
 

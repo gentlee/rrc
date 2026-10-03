@@ -38,21 +38,14 @@ const utilsAndConstants_1 = require('../utilsAndConstants')
 const utils_1 = require('./utils')
 const useMutation = (cache, options) => {
   var _a
-  const {
-    config,
-    abortControllers,
-    selectors: {selectMutationState},
-    actions: {updateMutationStateAndEntities},
-    extensions,
-  } = cache
+  const {config, extensions} = cache
   const {mutation: mutationKey, onCompleted, onSuccess, onError} = options
   ;(0, utils_1.validateStoreHooks)(extensions)
   const {useStore, useExternalStore, useSelector} = extensions.react.storeHooks
   const innerStore = useStore()
   const externalStore = useExternalStore()
-  const [mutationStateSelector, mutate, abort] = (0, react_1.useMemo)(() => {
-    const mutationStateSelectorFromUseMutation = (state) => selectMutationState(state, mutationKey)
-    const mutateFromUseMutation = (params) =>
+  const mutate = (0, react_1.useCallback)(
+    (params) =>
       __awaiter(void 0, void 0, void 0, function* () {
         return (0, mutate_1.mutate)(
           'useMutation.mutate',
@@ -65,20 +58,25 @@ const useMutation = (cache, options) => {
           onSuccess,
           onError,
         )
-      })
+      }),
+    [mutationKey, innerStore, externalStore, onCompleted, onSuccess, onError],
+  )
+  const [mutationStateSelector, abort] = (0, react_1.useMemo)(() => {
+    const mutationStateSelectorFromUseMutation = (state) =>
+      cache.selectors.selectMutationState(state, mutationKey)
     const abortFromUseMutation = () => {
       var _a
       const abortController =
-        (_a = abortControllers.get(innerStore)) === null || _a === void 0 ? void 0 : _a[mutationKey]
+        (_a = cache.abortControllers.get(innerStore)) === null || _a === void 0 ? void 0 : _a[mutationKey]
       if (abortController === undefined || abortController.signal.aborted) {
         return false
       }
       abortController.abort()
-      innerStore.dispatch(updateMutationStateAndEntities(mutationKey, {loading: undefined}))
+      innerStore.dispatch(cache.actions.updateMutationStateAndEntities(mutationKey, {loading: undefined}))
       return true
     }
-    return [mutationStateSelectorFromUseMutation, mutateFromUseMutation, abortFromUseMutation]
-  }, [mutationKey, innerStore, externalStore])
+    return [mutationStateSelectorFromUseMutation, abortFromUseMutation]
+  }, [mutationKey, innerStore])
   const mutationState =
     (_a = useSelector(mutationStateSelector)) !== null && _a !== void 0
       ? _a

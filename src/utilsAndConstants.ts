@@ -2,7 +2,6 @@ import type {
   CacheOptions,
   EntitiesMap,
   EntityChanges,
-  Key,
   Mutable,
   QueryState,
   QueryStateComparer,
@@ -49,7 +48,7 @@ export const EMPTY_ARRAY = Object.freeze([])
 export const noop = () => {}
 
 /** Default getCacheKey implementation. */
-export const defaultGetCacheKey = <P = unknown>(params: P): Key => {
+export const defaultGetCacheKey = <P = unknown>(params: P): PropertyKey => {
   switch (typeof params) {
     case 'string':
     case 'symbol':

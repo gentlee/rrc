@@ -1,4 +1,4 @@
-import type {EntityChanges, Key, MutationState, QueryState, Typenames} from './types'
+import type {EntityChanges, MutationState, QueryState, Typenames} from './types'
 import {CacheState} from './types'
 import {PACKAGE_SHORT_NAME} from './utilsAndConstants'
 
@@ -17,7 +17,7 @@ export const createActions = <N extends string, T extends Typenames, QP, QR, MP,
   const updateQueryStateAndEntitiesType = `${actionPrefix}updateQueryStateAndEntities` as const
   const updateQueryStateAndEntities = <K extends keyof (QP | QR)>(
     queryKey: K,
-    queryCacheKey: Key,
+    queryCacheKey: PropertyKey,
     state?: Partial<QueryState<T, QP[K], QR[K]>>,
     entityChanges?: EntityChanges<T>,
   ) => ({
@@ -55,7 +55,7 @@ export const createActions = <N extends string, T extends Typenames, QP, QR, MP,
       /** Query key */
       query: K
       /** Query cache key */
-      cacheKey?: Key
+      cacheKey?: PropertyKey
       /** Unix timestamp at which query expires. Is set to the query state. @Default Date.now() */
       expiresAt?: number
     }[],
@@ -71,7 +71,7 @@ export const createActions = <N extends string, T extends Typenames, QP, QR, MP,
       /** Query key */
       query: K
       /** Query cache key */
-      cacheKey?: Key
+      cacheKey?: PropertyKey
     }[],
   ) => ({
     type: clearQueryStateType,

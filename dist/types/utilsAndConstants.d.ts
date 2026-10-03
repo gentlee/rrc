@@ -2,7 +2,6 @@ import type {
   CacheOptions,
   EntitiesMap,
   EntityChanges,
-  Key,
   Mutable,
   QueryState,
   QueryStateComparer,
@@ -29,7 +28,7 @@ export declare const EMPTY_ARRAY: readonly never[]
 export declare const noop: () => void
 
 /** Default getCacheKey implementation. */
-export declare const defaultGetCacheKey: <P = unknown>(params: P) => Key
+export declare const defaultGetCacheKey: <P = unknown>(params: P) => PropertyKey
 
 export declare const applyEntityChanges: <T extends Typenames>(
   entities: EntitiesMap<T> & Mutable,

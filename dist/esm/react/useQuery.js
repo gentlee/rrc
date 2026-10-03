@@ -36,7 +36,7 @@ import {createStateComparer, defaultGetCacheKey, EMPTY_OBJECT, logDebug} from '.
 import {validateStoreHooks} from './utils'
 
 export const useQuery = (cache, useQueryOptions) => {
-  var _a, _b, _c, _d, _e
+  var _a, _b, _c, _d, _e, _f, _g
   const {
     extensions,
     config: {queries, globals, options: configOptions},
@@ -44,11 +44,20 @@ export const useQuery = (cache, useQueryOptions) => {
   } = cache
   const {
     query: queryKey,
-    skipFetch = false,
+    skipFetch = (_b =
+      (_a = queries[queryKey].skipFetch) !== null && _a !== void 0 ? _a : globals.queries.skipFetch) !==
+      null && _b !== void 0
+      ? _b
+      : false,
     params,
     selectorComparer,
-    fetchPolicy = (_a = queries[queryKey].fetchPolicy) !== null && _a !== void 0
-      ? _a
+    secondsToLive,
+    mergeResults,
+    onCompleted,
+    onSuccess,
+    onError,
+    fetchPolicy = (_c = queries[queryKey].fetchPolicy) !== null && _c !== void 0
+      ? _c
       : globals.queries.fetchPolicy,
   } = useQueryOptions
   validateStoreHooks(extensions)
@@ -57,14 +66,14 @@ export const useQuery = (cache, useQueryOptions) => {
   const externalStore = useExternalStore()
   const queryInfo = queries[queryKey]
   const logsEnabled = configOptions.logsEnabled
-  const getCacheKey = (_b = queryInfo.getCacheKey) !== null && _b !== void 0 ? _b : defaultGetCacheKey
+  const getCacheKey = (_d = queryInfo.getCacheKey) !== null && _d !== void 0 ? _d : defaultGetCacheKey
   const comparer =
     selectorComparer === undefined
-      ? (_d =
-          (_c = queryInfo.selectorComparer) !== null && _c !== void 0
-            ? _c
-            : globals.queries.selectorComparer) !== null && _d !== void 0
-        ? _d
+      ? (_f =
+          (_e = queryInfo.selectorComparer) !== null && _e !== void 0
+            ? _e
+            : globals.queries.selectorComparer) !== null && _f !== void 0
+        ? _f
         : defaultStateComparer
       : typeof selectorComparer === 'function'
         ? selectorComparer
@@ -74,7 +83,6 @@ export const useQuery = (cache, useQueryOptions) => {
     (options) =>
       __awaiter(void 0, void 0, void 0, function* () {
         const paramsPassed = options && 'params' in options
-        const {secondsToLive, mergeResults, onCompleted, onSuccess, onError} = useQueryOptions
         return yield queryImpl(
           'useQuery.query',
           innerStore,
@@ -92,13 +100,24 @@ export const useQuery = (cache, useQueryOptions) => {
           onError,
         )
       }),
-    [innerStore, externalStore, queryKey, cacheKey],
+    [
+      cache,
+      queryKey,
+      cacheKey,
+      externalStore,
+      secondsToLive,
+      getCacheKey,
+      mergeResults,
+      onCompleted,
+      onError,
+      onSuccess,
+    ],
   )
   const queryState =
-    (_e = useSelector((state) => {
+    (_g = useSelector((state) => {
       return selectQueryState(state, queryKey, cacheKey)
-    }, comparer)) !== null && _e !== void 0
-      ? _e
+    }, comparer)) !== null && _g !== void 0
+      ? _g
       : EMPTY_OBJECT
   useEffect(() => {
     if (skipFetch) {
@@ -117,7 +136,7 @@ export const useQuery = (cache, useQueryOptions) => {
       return
     }
     query()
-  }, [cacheKey, skipFetch])
+  }, [queryKey, cacheKey, skipFetch, externalStore])
   logsEnabled && logDebug('useQuery', {cacheKey, options: useQueryOptions, queryState})
   return [queryState, query]
 }

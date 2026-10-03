@@ -1,4 +1,4 @@
-import {CacheState, Key, MutationState, QueryState, Typenames} from './types'
+import {CacheState, MutationState, QueryState, Typenames} from './types'
 import {EMPTY_OBJECT} from './utilsAndConstants'
 
 export type Selectors<
@@ -14,7 +14,7 @@ export const createSelectors = <T extends Typenames, QP, QR, MP, MR>(
 ) => {
   const selectEntityById = <TN extends keyof T>(
     state: unknown,
-    id: Key | null | undefined,
+    id: PropertyKey | null | undefined,
     typename: TN,
   ): T[TN] | undefined => {
     // @ts-expect-error fix later
@@ -24,7 +24,7 @@ export const createSelectors = <T extends Typenames, QP, QR, MP, MR>(
   const selectQueryState = <QK extends keyof (QP & QR)>(
     state: unknown,
     query: QK,
-    cacheKey: Key,
+    cacheKey: PropertyKey,
   ): QueryState<
     T,
     QK extends keyof (QP | QR) ? QP[QK] : never,
@@ -49,19 +49,19 @@ export const createSelectors = <T extends Typenames, QP, QR, MP, MR>(
     selectCacheState,
     selectEntityById,
     selectQueryState,
-    selectQueryResult: <QK extends keyof (QP & QR)>(state: unknown, query: QK, cacheKey: Key) => {
+    selectQueryResult: <QK extends keyof (QP & QR)>(state: unknown, query: QK, cacheKey: PropertyKey) => {
       return selectQueryState(state, query, cacheKey).result
     },
-    selectQueryLoading: <QK extends keyof (QP & QR)>(state: unknown, query: QK, cacheKey: Key) => {
+    selectQueryLoading: <QK extends keyof (QP & QR)>(state: unknown, query: QK, cacheKey: PropertyKey) => {
       return selectQueryState(state, query, cacheKey).loading ?? false
     },
-    selectQueryError: <QK extends keyof (QP & QR)>(state: unknown, query: QK, cacheKey: Key) => {
+    selectQueryError: <QK extends keyof (QP & QR)>(state: unknown, query: QK, cacheKey: PropertyKey) => {
       return selectQueryState(state, query, cacheKey).error
     },
-    selectQueryParams: <QK extends keyof (QP & QR)>(state: unknown, query: QK, cacheKey: Key) => {
+    selectQueryParams: <QK extends keyof (QP & QR)>(state: unknown, query: QK, cacheKey: PropertyKey) => {
       return selectQueryState(state, query, cacheKey).params
     },
-    selectQueryExpiresAt: <QK extends keyof (QP & QR)>(state: unknown, query: QK, cacheKey: Key) => {
+    selectQueryExpiresAt: <QK extends keyof (QP & QR)>(state: unknown, query: QK, cacheKey: PropertyKey) => {
       return selectQueryState(state, query, cacheKey).expiresAt
     },
     selectMutationState,

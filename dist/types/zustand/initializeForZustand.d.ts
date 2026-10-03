@@ -2,7 +2,6 @@ import type {
   Cache,
   CacheState,
   EntityChanges,
-  Key,
   MutateOptions,
   MutationResult,
   MutationState,
@@ -43,7 +42,7 @@ export declare const initializeForZustand: <
     /** Updates query state, and optionally merges entity changes in a single action. */
     updateQueryStateAndEntities: (
       queryKey: keyof QP & keyof QR,
-      queryCacheKey: Key,
+      queryCacheKey: PropertyKey,
       state?: Partial<QueryState<T, QP[keyof QP & keyof QR], QR[keyof QP & keyof QR]>> | undefined,
       entityChanges?: EntityChanges<T> | undefined,
     ) => void
@@ -59,7 +58,7 @@ export declare const initializeForZustand: <
     invalidateQuery: (
       queries: {
         query: keyof QP & keyof QR
-        cacheKey?: Key
+        cacheKey?: PropertyKey
         expiresAt?: number
       }[],
     ) => void
@@ -68,7 +67,7 @@ export declare const initializeForZustand: <
     clearQueryState: (
       queries: {
         query: keyof QP & keyof QR
-        cacheKey?: Key
+        cacheKey?: PropertyKey
       }[],
     ) => void
     /** Clears states for provided mutation keys. */

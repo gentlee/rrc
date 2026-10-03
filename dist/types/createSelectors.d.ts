@@ -1,4 +1,4 @@
-import {CacheState, Key, MutationState, QueryState, Typenames} from './types'
+import {CacheState, MutationState, QueryState, Typenames} from './types'
 
 export type Selectors<
   T extends Typenames = Typenames,
@@ -14,40 +14,40 @@ export declare const createSelectors: <T extends Typenames, QP, QR, MP, MR>(
   selectCacheState: (state: unknown) => CacheState<T, QP, QR, MP, MR>
   selectEntityById: <TN extends keyof T>(
     state: unknown,
-    id: Key | null | undefined,
+    id: PropertyKey | null | undefined,
     typename: TN,
   ) => T[TN] | undefined
   selectQueryState: <QK extends keyof (QP & QR)>(
     state: unknown,
     query: QK,
-    cacheKey: Key,
+    cacheKey: PropertyKey,
   ) => QueryState<T, QK extends keyof (QP | QR) ? QP[QK] : never, QK extends keyof (QP | QR) ? QR[QK] : never>
   selectQueryResult: <QK extends keyof (QP & QR)>(
     state: unknown,
     query: QK,
-    cacheKey: Key,
+    cacheKey: PropertyKey,
   ) => (QK extends keyof QP & keyof QR ? QR[QK] : never) | undefined
   selectQueryLoading: <QK extends keyof (QP & QR)>(
     state: unknown,
     query: QK,
-    cacheKey: Key,
+    cacheKey: PropertyKey,
   ) =>
     | false
     | Promise<import('./types').NormalizedQueryResponse<T, QK extends keyof QP & keyof QR ? QR[QK] : never>>
   selectQueryError: <QK extends keyof (QP & QR)>(
     state: unknown,
     query: QK,
-    cacheKey: Key,
+    cacheKey: PropertyKey,
   ) => Error | undefined
   selectQueryParams: <QK extends keyof (QP & QR)>(
     state: unknown,
     query: QK,
-    cacheKey: Key,
+    cacheKey: PropertyKey,
   ) => (QK extends keyof QP & keyof QR ? QP[QK] : never) | undefined
   selectQueryExpiresAt: <QK extends keyof (QP & QR)>(
     state: unknown,
     query: QK,
-    cacheKey: Key,
+    cacheKey: PropertyKey,
   ) => number | undefined
   selectMutationState: <MK extends keyof (MP & MR)>(
     state: unknown,

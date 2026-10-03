@@ -15,7 +15,6 @@ import type {
   EntityChanges,
   EntityIds,
   Globals,
-  Key,
   Mutable,
   MutateOptions,
   Mutation,
@@ -139,7 +138,7 @@ export const initializeForReact = <N extends string, SK extends string, T extend
       ) => useMutation(privateCache, options),
       /** useSelector + selectEntityById. */
       useSelectEntityById: <TN extends keyof T>(
-        id: Key | null | undefined,
+        id: PropertyKey | null | undefined,
         typename: TN,
       ): T[TN] | undefined => {
         return storeHooks.useSelector((state: unknown) => selectEntityById(state, id, typename))

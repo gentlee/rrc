@@ -1,4 +1,4 @@
-import type {EntityChanges, Key, MutationState, QueryState, Typenames} from './types'
+import type {EntityChanges, MutationState, QueryState, Typenames} from './types'
 import {CacheState} from './types'
 
 export type Actions<
@@ -16,13 +16,13 @@ export declare const createActions: <N extends string, T extends Typenames, QP, 
   updateQueryStateAndEntities: {
     <K extends keyof (QP | QR)>(
       queryKey: K,
-      queryCacheKey: Key,
+      queryCacheKey: PropertyKey,
       state?: Partial<QueryState<T, QP[K], QR[K]>>,
       entityChanges?: EntityChanges<T>,
     ): {
       type: `@rrc/${N}/updateQueryStateAndEntities`
       queryKey: K
-      queryCacheKey: Key
+      queryCacheKey: PropertyKey
       state: Partial<QueryState<T, QP[K], QR[K]>> | undefined
       entityChanges: EntityChanges<T> | undefined
     }
@@ -54,7 +54,7 @@ export declare const createActions: <N extends string, T extends Typenames, QP, 
         /** Query key */
         query: K
         /** Query cache key */
-        cacheKey?: Key
+        cacheKey?: PropertyKey
         /** Unix timestamp at which query expires. Is set to the query state. @Default Date.now() */
         expiresAt?: number
       }[],
@@ -64,7 +64,7 @@ export declare const createActions: <N extends string, T extends Typenames, QP, 
         /** Query key */
         query: K
         /** Query cache key */
-        cacheKey?: Key
+        cacheKey?: PropertyKey
         /** Unix timestamp at which query expires. Is set to the query state. @Default Date.now() */
         expiresAt?: number
       }[]
@@ -77,7 +77,7 @@ export declare const createActions: <N extends string, T extends Typenames, QP, 
         /** Query key */
         query: K
         /** Query cache key */
-        cacheKey?: Key
+        cacheKey?: PropertyKey
       }[],
     ): {
       type: `@rrc/${N}/clearQueryState`
@@ -85,7 +85,7 @@ export declare const createActions: <N extends string, T extends Typenames, QP, 
         /** Query key */
         query: K
         /** Query cache key */
-        cacheKey?: Key
+        cacheKey?: PropertyKey
       }[]
     }
     type: `@rrc/${N}/clearQueryState`

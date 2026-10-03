@@ -1,6 +1,5 @@
 import type {
   Cache,
-  Key,
   MutateOptions,
   MutationResult,
   MutationState,
@@ -94,12 +93,15 @@ export declare const initializeForReact: <
       MutationState<
         T,
         MK extends keyof MP & keyof MR ? MP[MK] : never,
-        MK extends keyof MP & keyof MR ? MP[MK] : never
+        MK extends keyof MP & keyof MR ? MR[MK] : never
       >,
       () => boolean,
     ]
     /** useSelector + selectEntityById. */
-    useSelectEntityById: <TN extends keyof T>(id: Key | null | undefined, typename: TN) => T[TN] | undefined
+    useSelectEntityById: <TN extends keyof T>(
+      id: PropertyKey | null | undefined,
+      typename: TN,
+    ) => T[TN] | undefined
     /**
      * useSelector + selectEntitiesByTypename. Also subscribes to collection's change key if `mutableCollections` enabled.
      * @warning Subscribing to collections should be avoided.

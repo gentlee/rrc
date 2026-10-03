@@ -63,20 +63,28 @@ export const mutate = (logTag_1, innerStore_1, externalStore_1, _a, mutationKey_
       }
       const abortController = new AbortController()
       abortControllersOfStore[mutationKey] = abortController
-      const mutatePromise = mutations[mutationKey].mutation(params, externalStore, abortController.signal)
-      innerStore.dispatch(
-        updateMutationStateAndEntities(mutationKey, {
-          loading: mutatePromise,
-          params,
-          result: undefined,
-        }),
-      )
+      let mutatePromise
       let response
       let error
       try {
-        response = yield mutatePromise
+        mutatePromise = mutations[mutationKey].mutation(params, externalStore, abortController.signal)
       } catch (e) {
         error = e
+      }
+      if (!error) {
+        innerStore.dispatch(
+          updateMutationStateAndEntities(mutationKey, {
+            loading: mutatePromise,
+            params,
+            result: undefined,
+            error,
+          }),
+        )
+        try {
+          response = yield mutatePromise
+        } catch (e) {
+          error = e
+        }
       }
       options.logsEnabled &&
         logDebug(`${logTag} finished`, {response, error, aborted: abortController.signal.aborted})
@@ -87,6 +95,7 @@ export const mutate = (logTag_1, innerStore_1, externalStore_1, _a, mutationKey_
       if (error) {
         innerStore.dispatch(
           updateMutationStateAndEntities(mutationKey, {
+            params,
             error,
             loading: undefined,
           }),

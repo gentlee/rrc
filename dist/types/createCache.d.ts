@@ -5,7 +5,6 @@ import type {
   EntitiesMap,
   EntityChanges,
   Globals,
-  Key,
   Mutable,
   MutationInfo,
   MutationState,
@@ -50,7 +49,7 @@ export declare const withTypenames: <WT extends Typenames = Typenames>() => {
       selectQueryState: <QK extends keyof QP | keyof QR>(
         state: unknown,
         query: QK,
-        cacheKey: Key,
+        cacheKey: PropertyKey,
       ) => QueryState<
         T,
         QK extends keyof QP & keyof QR ? QP[QK] : never,
@@ -60,31 +59,31 @@ export declare const withTypenames: <WT extends Typenames = Typenames>() => {
       selectQueryResult: <QK extends keyof QP | keyof QR>(
         state: unknown,
         query: QK,
-        cacheKey: Key,
+        cacheKey: PropertyKey,
       ) => (QK extends keyof QP & keyof QR ? QR[QK] : never) | undefined
       /** Selects query loading state. */
       selectQueryLoading: <QK extends keyof QP | keyof QR>(
         state: unknown,
         query: QK,
-        cacheKey: Key,
+        cacheKey: PropertyKey,
       ) => false | Promise<NormalizedQueryResponse<T, QK extends keyof QP & keyof QR ? QR[QK] : never>>
       /** Selects query latest error. */
       selectQueryError: <QK extends keyof QP | keyof QR>(
         state: unknown,
         query: QK,
-        cacheKey: Key,
+        cacheKey: PropertyKey,
       ) => Error | undefined
       /** Selects query latest params. */
       selectQueryParams: <QK extends keyof QP | keyof QR>(
         state: unknown,
         query: QK,
-        cacheKey: Key,
+        cacheKey: PropertyKey,
       ) => (QK extends keyof QP & keyof QR ? QP[QK] : never) | undefined
       /** Selects query latest expiresAt. */
       selectQueryExpiresAt: <QK extends keyof QP | keyof QR>(
         state: unknown,
         query: QK,
-        cacheKey: Key,
+        cacheKey: PropertyKey,
       ) => number | undefined
       /** Selects mutation state. */
       selectMutationState: <MK extends keyof MP | keyof MR>(
@@ -115,7 +114,7 @@ export declare const withTypenames: <WT extends Typenames = Typenames>() => {
       /** Selects entity by id and typename. */
       selectEntityById: <TN extends keyof T>(
         state: unknown,
-        id: Key | null | undefined,
+        id: PropertyKey | null | undefined,
         typename: TN,
       ) => T[TN] | undefined
       /** Selects all entities. */
@@ -180,7 +179,7 @@ export declare const createCache: <
     selectQueryState: <QK_1 extends keyof QP | keyof QR>(
       state: unknown,
       query: QK_1,
-      cacheKey: Key,
+      cacheKey: PropertyKey,
     ) => QueryState<
       T,
       QK_1 extends keyof QP & keyof QR ? QP[QK_1] : never,
@@ -190,31 +189,31 @@ export declare const createCache: <
     selectQueryResult: <QK_1 extends keyof QP | keyof QR>(
       state: unknown,
       query: QK_1,
-      cacheKey: Key,
+      cacheKey: PropertyKey,
     ) => (QK_1 extends keyof QP & keyof QR ? QR[QK_1] : never) | undefined
     /** Selects query loading state. */
     selectQueryLoading: <QK_1 extends keyof QP | keyof QR>(
       state: unknown,
       query: QK_1,
-      cacheKey: Key,
+      cacheKey: PropertyKey,
     ) => false | Promise<NormalizedQueryResponse<T, QK_1 extends keyof QP & keyof QR ? QR[QK_1] : never>>
     /** Selects query latest error. */
     selectQueryError: <QK_1 extends keyof QP | keyof QR>(
       state: unknown,
       query: QK_1,
-      cacheKey: Key,
+      cacheKey: PropertyKey,
     ) => Error | undefined
     /** Selects query latest params. */
     selectQueryParams: <QK_1 extends keyof QP | keyof QR>(
       state: unknown,
       query: QK_1,
-      cacheKey: Key,
+      cacheKey: PropertyKey,
     ) => (QK_1 extends keyof QP & keyof QR ? QP[QK_1] : never) | undefined
     /** Selects query latest expiresAt. */
     selectQueryExpiresAt: <QK_1 extends keyof QP | keyof QR>(
       state: unknown,
       query: QK_1,
-      cacheKey: Key,
+      cacheKey: PropertyKey,
     ) => number | undefined
     /** Selects mutation state. */
     selectMutationState: <MK_1 extends keyof MP | keyof MR>(
@@ -248,7 +247,7 @@ export declare const createCache: <
     /** Selects entity by id and typename. */
     selectEntityById: <TN extends keyof T>(
       state: unknown,
-      id: Key | null | undefined,
+      id: PropertyKey | null | undefined,
       typename: TN,
     ) => T[TN] | undefined
     /** Selects all entities. */

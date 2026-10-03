@@ -29,7 +29,7 @@ var __awaiter =
       step((generator = generator.apply(thisArg, _arguments || [])).next())
     })
   }
-import {useMemo} from 'react'
+import {useCallback, useMemo} from 'react'
 
 import {mutate as mutateImpl} from '../mutate'
 import {EMPTY_OBJECT, logDebug} from '../utilsAndConstants'
@@ -37,21 +37,14 @@ import {validateStoreHooks} from './utils'
 
 export const useMutation = (cache, options) => {
   var _a
-  const {
-    config,
-    abortControllers,
-    selectors: {selectMutationState},
-    actions: {updateMutationStateAndEntities},
-    extensions,
-  } = cache
+  const {config, extensions} = cache
   const {mutation: mutationKey, onCompleted, onSuccess, onError} = options
   validateStoreHooks(extensions)
   const {useStore, useExternalStore, useSelector} = extensions.react.storeHooks
   const innerStore = useStore()
   const externalStore = useExternalStore()
-  const [mutationStateSelector, mutate, abort] = useMemo(() => {
-    const mutationStateSelectorFromUseMutation = (state) => selectMutationState(state, mutationKey)
-    const mutateFromUseMutation = (params) =>
+  const mutate = useCallback(
+    (params) =>
       __awaiter(void 0, void 0, void 0, function* () {
         return mutateImpl(
           'useMutation.mutate',
@@ -64,20 +57,25 @@ export const useMutation = (cache, options) => {
           onSuccess,
           onError,
         )
-      })
+      }),
+    [mutationKey, innerStore, externalStore, onCompleted, onSuccess, onError],
+  )
+  const [mutationStateSelector, abort] = useMemo(() => {
+    const mutationStateSelectorFromUseMutation = (state) =>
+      cache.selectors.selectMutationState(state, mutationKey)
     const abortFromUseMutation = () => {
       var _a
       const abortController =
-        (_a = abortControllers.get(innerStore)) === null || _a === void 0 ? void 0 : _a[mutationKey]
+        (_a = cache.abortControllers.get(innerStore)) === null || _a === void 0 ? void 0 : _a[mutationKey]
       if (abortController === undefined || abortController.signal.aborted) {
         return false
       }
       abortController.abort()
-      innerStore.dispatch(updateMutationStateAndEntities(mutationKey, {loading: undefined}))
+      innerStore.dispatch(cache.actions.updateMutationStateAndEntities(mutationKey, {loading: undefined}))
       return true
     }
-    return [mutationStateSelectorFromUseMutation, mutateFromUseMutation, abortFromUseMutation]
-  }, [mutationKey, innerStore, externalStore])
+    return [mutationStateSelectorFromUseMutation, abortFromUseMutation]
+  }, [mutationKey, innerStore])
   const mutationState =
     (_a = useSelector(mutationStateSelector)) !== null && _a !== void 0 ? _a : EMPTY_OBJECT
   config.options.logsEnabled && logDebug('useMutation', {options, mutationState})

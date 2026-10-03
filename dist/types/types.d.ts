@@ -1,8 +1,6 @@
 import type {Actions} from './createActions'
 import {createCache} from './createCache'
 
-export type Key = string | number | symbol
-
 export type Mutable = {
   /**
    * Used only when mutable cache enabled. Always incremented when collection changed by reducer to allow subscribe on changes.
@@ -11,7 +9,7 @@ export type Mutable = {
   _changeKey?: number
 }
 
-export type Dict<T> = Record<Key, T> & Mutable
+export type Dict<T> = Record<PropertyKey, T> & Mutable
 
 export type OptionalPartial<T, K extends keyof T> = Partial<{
   [A in K]: Partial<T[A]>
@@ -98,7 +96,7 @@ export type Globals<T extends Typenames> = {
   /** Query options. */
   queries: {
     /** Determines when useQuery fetch triggers should start fetching. Fetch is performed if function returns true.
-     * Fetch triggers are: 1) mount 2) cache key change 3) skipFetch value change to false.
+     * Fetch triggers are: 1) mount 2) query or cache key change 3) skipFetch value change to false 4) store change.
      * @Default FetchPolicy.NoCacheOrExpired */
     fetchPolicy: (
       expired: boolean,
@@ -106,11 +104,11 @@ export type Globals<T extends Typenames> = {
       state: QueryState<T, unknown, unknown>,
       store: AnyStore,
     ) => boolean
-    /** Disables any fetches when set to true. Triggers fetch when changed to false. @Default false */
+    /** Disables automatic useQuery fetches when true. Manual fetch calls bypass this setting. Hook options override query defaults, which override global defaults. Triggers automatic fetch when changed to false. @Default false */
     skipFetch: boolean
     /** If set, this value updates expiresAt value of query state when query result is received. @Default undefined */
     secondsToLive?: number
-    /** Either comparer function, or array of keys to subscribe by useQuery's useSelector. @Default compares result, loading, params, error. */
+    /** Either comparer function, or array of keys to subscribe by useQuery's useSelector. @Default compares result, loading, params, error. @Zustand Use `createWithEqualityFn` for the store creation to support that option. */
     selectorComparer?: QueryStateComparer<T, unknown, unknown> | (keyof QueryState)[]
   }
 }
@@ -145,7 +143,7 @@ export type EntitiesMap<T extends Typenames> = {
 }
 
 export type EntityIds<T extends Typenames> = {
-  [K in keyof T]?: Key[]
+  [K in keyof T]?: PropertyKey[] | Set<PropertyKey>
 }
 
 export type CacheState<T extends Typenames, QP, QR, MP, MR> = {
@@ -161,7 +159,7 @@ export type CacheState<T extends Typenames, QP, QR, MP, MR> = {
 export type CacheClient<T extends Typenames, QP, QR, MP, MR> = {
   query: <QK extends keyof (QP & QR)>(
     options: QueryOptions<T, QP, QR, QK>,
-  ) => Promise<QueryResult<QK extends keyof (QP | QR) ? QP[QK] : never>>
+  ) => Promise<QueryResult<QK extends keyof (QP | QR) ? QR[QK] : never>>
   mutate: <MK extends keyof (MP & MR)>(
     options: MutateOptions<T, MP, MR, MK>,
   ) => Promise<MutationResult<MK extends keyof (MP | MR) ? MR[MK] : never>>
@@ -172,7 +170,7 @@ export type QueryInfo<T extends Typenames = Typenames, P = unknown, R = unknown>
 > & {
   query: NormalizedQuery<T, P, R>
   /** Determines when useQuery fetch triggers should start fetching. Fetch is performed if function returns true.
-   * Fetch triggers are: 1) mount 2) cache key change 3) skipFetch value change to false.
+   * Fetch triggers are: 1) mount 2) query or cache key change 3) skipFetch value change to false 4) store change.
    * @Default FetchPolicy.NoCacheOrExpired */
   fetchPolicy?: (expired: boolean, params: P, queryState: QueryState<T, P, R>, store: AnyStore) => boolean
   /** Merges results before saving to the store. Default implementation is using the latest result. */
@@ -187,7 +185,7 @@ export type QueryInfo<T extends Typenames = Typenames, P = unknown, R = unknown>
    * Default implementation uses `String()` or `JSON.stringify` depending on type.
    * It is recommended to override it when default implementation is not optimal or when keys in params object can be sorted in random order etc.
    */
-  getCacheKey?: (params: P) => Key
+  getCacheKey?: (params: P) => PropertyKey
   /** Called after fetch completed either successfully or not. */
   onCompleted?: (
     response: NormalizedQueryResponse<T, R> | undefined,
@@ -199,7 +197,7 @@ export type QueryInfo<T extends Typenames = Typenames, P = unknown, R = unknown>
   onSuccess?: (response: NormalizedQueryResponse<T, R>, params: P, store: AnyStore) => void
   /** Called after fetch finished with error. Should return true if error was handled and does not require global onError handling. */
   onError?: (error: unknown, params: P, store: AnyStore) => boolean | void | null | undefined
-  /** Either comparer function, or array of keys to subscribe by useQuery's useSelector. Default compares params, result, loading, error. */
+  /** Either comparer function, or array of keys to subscribe by useQuery's useSelector. @Default compares params, result, loading, error. @Zustand Use `createWithEqualityFn` for the store creation to support that option. */
   selectorComparer?: QueryStateComparer<T, P, R> | (keyof QueryState)[]
 }
 
