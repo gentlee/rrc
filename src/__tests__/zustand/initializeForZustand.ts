@@ -1,4 +1,4 @@
-import {createTestCache} from '../../testing/redux/cache'
+import {createTestCache, testCaches} from '../../testing/redux/cache'
 import {consoleWarnSpy} from '../../testing/setup'
 import {ZustandStoreLike} from '../../types'
 import {CacheExtensions} from '../../typesPrivate'
@@ -42,5 +42,19 @@ test('initializeForZustand correct result, double init warns', () => {
         mutate: expect.any(Function),
       },
     } satisfies ReturnType<typeof initializeForZustand>)
+  })
+})
+
+describe.each(testCaches)('%s', (_, testCache) => {
+  test('empty entity update does not call setState', () => {
+    const cache = createTestCache(testCache.config.options.mutableCollections)
+    const state = cache.utils.getInitialState()
+    const setState = jest.fn()
+    const store = Object.assign(jest.fn(), {getState: () => state, setState})
+    const {actions} = initializeForZustand(cache, store)
+
+    actions.mergeEntityChanges({})
+
+    expect(setState).not.toHaveBeenCalled()
   })
 })

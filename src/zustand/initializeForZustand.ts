@@ -74,12 +74,15 @@ export const initializeForZustand = <
   } = privateCache
 
   const dispatch = (action: Actions<N, T, QP, QR, MP, MR>[keyof Actions]) => {
-    const state = reducer(
-      selectCacheState(store.getState()),
+    const prevState = selectCacheState(store.getState())
+    const newState = reducer(
+      prevState,
       // @ts-expect-error TODO fix types
       action,
     )
-    store.setState(getRootState(state) as S)
+    if (newState !== prevState) {
+      store.setState(getRootState(newState) as S)
+    }
   }
 
   const innerStore = {dispatch, getState: store.getState}

@@ -1,7 +1,6 @@
 import {EntitiesMap} from 'rrc'
 
-import {Typenames} from '../../cache/redux/normalized'
-import {Bank, User} from './types'
+import {Bank, Typenames, User} from './types'
 
 export const API_TIMEOUT = 300
 
