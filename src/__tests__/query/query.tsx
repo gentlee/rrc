@@ -2,10 +2,10 @@ import {act, render as renderImpl} from '@testing-library/react'
 import React from 'react'
 import {Provider} from 'react-redux'
 
-import {assertEventLog, generateTestEntitiesMap, logEvent} from '../testing/api/utils'
-import {testCaches} from '../testing/redux/cache'
-import {createReduxStore} from '../testing/redux/store'
-import {advanceHalfApiTimeout} from '../testing/utils'
+import {assertEventLog, generateTestEntitiesMap, logEvent} from '../../testing/api/utils'
+import {testCaches} from '../../testing/redux/cache'
+import {createReduxStore} from '../../testing/redux/store'
+import {advanceHalfApiTimeout} from '../../testing/utils'
 
 describe.each(testCaches)('%s', (_, cache, withChangeKey) => {
   const {

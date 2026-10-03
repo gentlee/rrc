@@ -46,28 +46,36 @@ export const mutate = async <
   const abortController = new AbortController()
   abortControllersOfStore[mutationKey] = abortController
 
-  const mutatePromise = mutations[mutationKey].mutation(
-    // @ts-expect-error fix later
-    params,
-    externalStore,
-    abortController.signal,
-  )
-
-  innerStore.dispatch(
-    updateMutationStateAndEntities(mutationKey as keyof (MP | MR), {
-      // @ts-expect-error TODO fix types
-      loading: mutatePromise,
-      params,
-      result: undefined,
-    }),
-  )
-
+  let mutatePromise
   let response
-  let error
+  let error: Error | undefined
   try {
-    response = await mutatePromise
+    mutatePromise = mutations[mutationKey].mutation(
+      // @ts-expect-error fix later
+      params,
+      externalStore,
+      abortController.signal,
+    )
   } catch (e) {
-    error = e
+    error = e as Error
+  }
+
+  if (!error) {
+    innerStore.dispatch(
+      updateMutationStateAndEntities(mutationKey as keyof (MP | MR), {
+        // @ts-expect-error TODO fix types
+        loading: mutatePromise,
+        params,
+        result: undefined,
+        error,
+      }),
+    )
+
+    try {
+      response = await mutatePromise
+    } catch (e) {
+      error = e as Error
+    }
   }
 
   options.logsEnabled &&
@@ -82,7 +90,8 @@ export const mutate = async <
   if (error) {
     innerStore.dispatch(
       updateMutationStateAndEntities(mutationKey as keyof (MP | MR), {
-        error: error as Error,
+        params,
+        error,
         loading: undefined,
       }),
     )
