@@ -138,7 +138,7 @@ export const initializeForZustand = <
       updateMutationStateAndEntities,
       /** Merges EntityChanges to the state. */
       mergeEntityChanges,
-      /** Sets expiresAt to Date.now(). */
+      /** Sets expiresAt of provided queries to Date.now(), or to the provided expiresAt value. If cache key is not provided, all states of the query are invalidated. */
       invalidateQuery,
       /** Clears states for provided query keys and cache keys.
        * If cache key for query key is not provided, the whole state for query key is cleared. */

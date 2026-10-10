@@ -262,9 +262,9 @@ export type QueryResult<R = unknown> = {
   /**
    * Fetch cancelled reason.
    * @value loading - already loading. Result of current fetch is returned.
-   * @value not-expired - not expired yet. Current state result is returned.
+   * @value fetch-policy - `onlyIfExpired` was set and fetch policy of the query returned false, e.g. result is not expired yet. Current state result is returned.
    */
-  cancelled?: 'loading' | 'not-expired'
+  cancelled?: 'loading' | 'fetch-policy'
   result?: R
 }
 

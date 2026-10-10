@@ -65,7 +65,7 @@ describe.each(testCaches)('%s', (_, cache, withChangeKey) => {
     expect(result_user0_1_first).toStrictEqual({result: 0})
     expect(result_user0_2_loading).toStrictEqual({result: 0, cancelled: 'loading'})
     expect(result_user0_3_loading).toStrictEqual({result: 0, cancelled: 'loading'})
-    expect(result_user0_4_cached).toStrictEqual({result: 0, cancelled: 'not-expired'})
+    expect(result_user0_4_cached).toStrictEqual({result: 0, cancelled: 'fetch-policy'})
     expect(result_user1_1_first).toStrictEqual({result: 1})
     expect(result_user1_2_loading).toStrictEqual({result: 1, cancelled: 'loading'})
     expect(store.getState()).toStrictEqual({

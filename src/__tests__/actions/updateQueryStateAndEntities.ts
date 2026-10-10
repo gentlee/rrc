@@ -5,7 +5,7 @@ import {noop} from '../../utilsAndConstants'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const loadingPromise = new Promise((x) => x({result: 0})) as any
 
-describe.each([testCaches[1]])('%s', (_, cache, withChangeKey) => {
+describe.each(testCaches)('%s', (_, cache, withChangeKey) => {
   const {
     reducer,
     actions: {updateQueryStateAndEntities},

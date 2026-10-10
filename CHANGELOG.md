@@ -28,7 +28,8 @@ Notable changes of each published version. Breaking changes are listed first.
 
   A policy that still declares `expired` first can keep compiling, so check custom policies manually.
 
-- **`onlyIfExpired` uses the fetch policy.** `query({onlyIfExpired: true})` now fetches only if the fetch policy of the query (query config, then globals, or the one passed to `useQuery`) returns `true`. With the default `FetchPolicy.NoCacheOrExpired` a cached result without `expiresAt` is no longer refetched: before it was, now the call returns `{cancelled: 'not-expired'}`.
+- **`onlyIfExpired` uses the fetch policy.** `query({onlyIfExpired: true})` now fetches only if the fetch policy of the query (query config, then globals, or the one passed to `useQuery`) returns `true`. With the default `FetchPolicy.NoCacheOrExpired` a cached result without `expiresAt` is no longer refetched: before it was, now the call is cancelled.
+- **Cancellation reason is renamed.** `QueryResult.cancelled` is `'fetch-policy'` instead of `'not-expired'`, because the fetch can be cancelled by any fetch policy.
 - **CommonJS only.** The ESM build is removed, the package now has a single CommonJS build with type declarations. The ESM build was not loadable by Node and failed at runtime in production builds of bundlers that do not transform `require` in ES modules (e.g. Vite), when `react-redux` hooks were not passed to `initializeForReact`. Entry points are the same: `rrc`, `rrc/react`, `rrc/redux`, `rrc/zustand`.
 - **ES2020 output.** The package is compiled to ES2020 instead of ES2016 and requires an environment with native `async`/`await`, optional chaining and nullish coalescing, or a bundler that transpiles dependencies.
 - **Peer dependencies.** Minimal versions are now `react >=16.8` and `react-redux >=7.1`, the first versions with hooks used by the library.

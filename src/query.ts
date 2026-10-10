@@ -65,14 +65,14 @@ export const query = async <
     )
   ) {
     logsEnabled &&
-      logDebug(`${logTag} fetch cancelled: not expired yet`, {
+      logDebug(`${logTag} fetch cancelled: fetch policy returned false`, {
         queryStateOnStart,
         params,
         cacheKey,
         onlyIfExpired,
       })
 
-    return {cancelled: 'not-expired', result: queryStateOnStart.result}
+    return {cancelled: 'fetch-policy', result: queryStateOnStart.result}
   }
 
   const {updateQueryStateAndEntities} = actions

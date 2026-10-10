@@ -658,6 +658,35 @@ describe.each(testCaches)('%s', (_, cache, withChangeKey) => {
     },
   )
 
+  test('onlyIfExpired uses fetch policy passed to the hook', async () => {
+    render({query: 'getUser', params: 0, fetchPolicy: FetchPolicy.Always})
+    await act(advanceApiTimeout)
+    expect(getUser).toBeCalledTimes(1)
+
+    // Result is cached and never expires, but FetchPolicy.Always of the hook allows fetch.
+    let result
+    await act(async () => {
+      refetch({onlyIfExpired: true}).then((x: unknown) => (result = x))
+      await advanceApiTimeout()
+    })
+    expect(result).toStrictEqual({result: 0})
+    expect(getUser).toBeCalledTimes(2)
+
+    // Fetch policy of the hook that never allows fetch.
+    const neverFetch = jest.fn(() => false)
+    render({query: 'getUser', params: 0, fetchPolicy: neverFetch})
+    neverFetch.mockClear()
+    await act(async () => {
+      result = await refetch({onlyIfExpired: true})
+    })
+    expect(result).toStrictEqual({cancelled: 'fetch-policy', result: 0})
+    expect(neverFetch).toHaveBeenCalledTimes(1)
+    expect(neverFetch).toHaveBeenCalledWith(0, selectQueryState(store.getState(), 'getUser', 0), store)
+    expect(getUser).toBeCalledTimes(2)
+
+    clearEventLog()
+  })
+
   test('secondsToLive, onlyIfExpired', async () => {
     render({query: 'getUserTtl', params: 0})
     await act(advanceApiTimeout)

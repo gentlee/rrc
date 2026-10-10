@@ -48,7 +48,7 @@
 | updateQueryStateAndEntities | Updates query state, and optionally merges entity changes in a single action. |
 | updateMutationStateAndEntities | Updates mutation state, and optionally merges entity changes in a single action. |
 | mergeEntityChanges | Merges EntityChanges to the state. |
-| invalidateQuery | Sets expiresAt to Date.now(). |
+| invalidateQuery | Sets expiresAt of provided queries to Date.now(), or to the provided expiresAt value. If cache key is not provided, all states of the query are invalidated. |
 | clearQueryState | Clears states for provided query keys and cache keys.  If cache key for query key is not provided, the whole state for query key is cleared. |
 | clearMutationState | Clears states for provided mutation keys. |
 | clearCache | Replaces cache state with initial, optionally merging with provided state. Doesn't cancel running fetches and should be used with caution. |
@@ -67,7 +67,7 @@
 | updateQueryStateAndEntities | Updates query state, and optionally merges entity changes in a single action. |
 | updateMutationStateAndEntities | Updates mutation state, and optionally merges entity changes in a single action. |
 | mergeEntityChanges | Merges EntityChanges to the state. |
-| invalidateQuery | Sets expiresAt to Date.now(). |
+| invalidateQuery | Sets expiresAt of provided queries to Date.now(), or to the provided expiresAt value. If cache key is not provided, all states of the query are invalidated. |
 | clearQueryState | Clears states for provided query keys and cache keys.  If cache key for query key is not provided, the whole state for query key is cleared. |
 | clearMutationState | Clears states for provided mutation keys. |
 | clearCache | Replaces cache state with initial, optionally merging with provided state. Doesn't cancel running fetches and should be used with caution. |

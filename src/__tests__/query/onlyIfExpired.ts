@@ -46,7 +46,7 @@ describe.each([false, true])('onlyIfExpired (mutableCollections: %s)', (mutableC
     const outcome = await client.query({query: 'load', params: 1, onlyIfExpired: true})
 
     expect(request).toHaveBeenCalledTimes(shouldFetch ? 1 : 0)
-    expect(outcome).toEqual(shouldFetch ? {result: 2} : {cancelled: 'not-expired', result})
+    expect(outcome).toEqual(shouldFetch ? {result: 2} : {cancelled: 'fetch-policy', result})
 
     // Default fetch policy is used when it is not set in the config.
     expect(FetchPolicy.NoCacheOrExpired(1, stateOnStart)).toBe(shouldFetch)
@@ -62,7 +62,7 @@ describe.each([false, true])('onlyIfExpired (mutableCollections: %s)', (mutableC
     // Expired, but policy of the query does not allow fetch.
     const outcome = await client.query({query: 'load', params: 1, onlyIfExpired: true})
 
-    expect(outcome).toEqual({cancelled: 'not-expired', result: 1})
+    expect(outcome).toEqual({cancelled: 'fetch-policy', result: 1})
     expect(request).not.toHaveBeenCalled()
     expect(queryFetchPolicy).toHaveBeenCalledTimes(1)
     expect(queryFetchPolicy).toHaveBeenCalledWith(1, stateOnStart, store)
@@ -76,7 +76,7 @@ describe.each([false, true])('onlyIfExpired (mutableCollections: %s)', (mutableC
 
     const outcome = await client.query({query: 'load', params: 1, onlyIfExpired: true})
 
-    expect(outcome).toEqual({cancelled: 'not-expired', result: 1})
+    expect(outcome).toEqual({cancelled: 'fetch-policy', result: 1})
     expect(request).not.toHaveBeenCalled()
     expect(globalFetchPolicy).toHaveBeenCalledTimes(1)
   })

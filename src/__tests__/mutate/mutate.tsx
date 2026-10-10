@@ -14,7 +14,7 @@ import {EMPTY_STATE} from '../../testing/redux/store'
 import {createReduxStore} from '../../testing/redux/store'
 import {advanceApiTimeout, advanceHalfApiTimeout} from '../../testing/utils'
 
-describe.each([testCaches[1]])('%s', (_, cache, withChangeKey) => {
+describe.each(testCaches)('%s', (_, cache, withChangeKey) => {
   const {
     actions: {mergeEntityChanges},
     hooks,
@@ -103,7 +103,7 @@ describe.each([testCaches[1]])('%s', (_, cache, withChangeKey) => {
           },
         }),
         entities: withChangeKey(1, {
-          ...generateTestEntitiesMap(2, true, 0),
+          ...generateTestEntitiesMap(2, true, cache.config.options.mutableCollections ? 0 : undefined),
           users: withChangeKey(1, {
             0: generateTestUser(0),
             1: {...generateTestUser(1), name: 'New name 2'},
