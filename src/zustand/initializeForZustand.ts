@@ -126,7 +126,7 @@ export const initializeForZustand = <
     actions: {
       /**
        * Performs a query using provided options. Deduplicates calls with the same cache key. Always returns current cached result, even when query is cancelled or finished with error.
-       * @param onlyIfExpired When true, cancels fetch if result is not yet expired.
+       * @param onlyIfExpired When true, cancels fetch if fetch policy of the query returns false. With default policy - if result is cached and not yet expired.
        * @param skipFetch Fetch is cancelled and current cached result is returned.
        */
       query,

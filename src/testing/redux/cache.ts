@@ -2,6 +2,7 @@ import {withTypenames} from '../../createCache'
 import {initializeForReact} from '../../react'
 import {initializeForRedux} from '../../redux'
 import {CacheToPrivate} from '../../typesPrivate'
+import {isExpired} from '../../utilsAndConstants'
 import {getUser, getUsers, removeUser, updateUser, updateUserNotNormalized} from '../api/mocks'
 import type {Bank, User} from '../api/types'
 import {logEvent} from '../api/utils'
@@ -73,8 +74,8 @@ export const createTestCache = <SK extends string>(
       },
       getFullUser: {
         query: getUser,
-        fetchPolicy(expired, id, _, {getState}): boolean {
-          if (expired) {
+        fetchPolicy(id, state, {getState}): boolean {
+          if (isExpired(state.expiresAt)) {
             return true
           }
 

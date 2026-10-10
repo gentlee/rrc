@@ -205,18 +205,24 @@ export const createStateComparer = <T extends Typenames = Typenames, Q = unknown
   }
 }
 
+/** Returns true if `expiresAt` is set and is lower than or equal to `now`. State without `expiresAt` never expires. */
+export const isExpired = (expiresAt: number | null | undefined, now = Date.now()) => {
+  return expiresAt != null && expiresAt <= now
+}
+
 // doc-header FetchPolicy
 export const FetchPolicy = {
   /**
-   * Only if cache does not exist (result is undefined) or expired. Default.
-   * @param expired `true` when `expiresAt` is defined and lower than `Date.now()`
+   * Only if cache does not exist (result is undefined) or expired (see `isExpired`). Default.
+   * @param now Timestamp to compare `expiresAt` with. @Default Date.now()
    */
   NoCacheOrExpired: <T extends Typenames = Typenames, P = unknown, R = unknown>(
-    expired: boolean,
     _params: P,
     state: QueryState<T, P, R>,
+    _store?: unknown,
+    now?: number,
   ) => {
-    return expired || state.result === undefined
+    return state.result === undefined || isExpired(state.expiresAt, now)
   },
   /** Every fetch trigger. */
   Always: () => true,

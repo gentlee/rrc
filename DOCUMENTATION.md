@@ -43,7 +43,7 @@
 
 | Symbol | Description |
 |--------|---------------|
-| query | Performs a query using provided options. Deduplicates calls with the same cache key. Always returns current cached result, even when query is cancelled or finished with error.  @param onlyIfExpired When true, cancels fetch if result is not yet expired.  @param skipFetch Fetch is cancelled and current cached result is returned. |
+| query | Performs a query using provided options. Deduplicates calls with the same cache key. Always returns current cached result, even when query is cancelled or finished with error.  @param onlyIfExpired When true, cancels fetch if fetch policy of the query returns false. With default policy - if result is cached and not yet expired.  @param skipFetch Fetch is cancelled and current cached result is returned. |
 | mutate | Performs a mutation, aborting previous one with the same mutation key. Returns result only if finished succesfully. |
 | updateQueryStateAndEntities | Updates query state, and optionally merges entity changes in a single action. |
 | updateMutationStateAndEntities | Updates mutation state, and optionally merges entity changes in a single action. |
@@ -76,7 +76,7 @@
 
 | Symbol | Description |
 |--------|---------------|
-| query | Performs a query using provided options. Deduplicates calls with the same cache key. Always returns current cached result, even when query is cancelled or finished with error.  @param onlyIfExpired When true, cancels fetch if result is not yet expired.  @param skipFetch Fetch is cancelled and current cached result is returned. |
+| query | Performs a query using provided options. Deduplicates calls with the same cache key. Always returns current cached result, even when query is cancelled or finished with error.  @param onlyIfExpired When true, cancels fetch if fetch policy of the query returns false. With default policy - if result is cached and not yet expired.  @param skipFetch Fetch is cancelled and current cached result is returned. |
 | mutate | Performs a mutation, aborting previous one with the same mutation key. Returns result only if finished succesfully. |
 
 ##### Utils
@@ -111,11 +111,12 @@
 | defaultGetCacheKey | Default getCacheKey implementation. |
 | isEmptyObject | Returns true if object has no keys. |
 | createStateComparer | Returns query state comparer that compares only provided fields. Used in implementation of `selectorComparer` option. |
+| isExpired | Returns true if `expiresAt` is set and is lower than or equal to `now`. State without `expiresAt` never expires. |
 
 ##### FetchPolicy
 
 | Symbol | Description |
 |--------|---------------|
-| NoCacheOrExpired | Only if cache does not exist (result is undefined) or expired. Default.  @param expired `true` when `expiresAt` is defined and lower than `Date.now()` |
+| NoCacheOrExpired | Only if cache does not exist (result is undefined) or expired (see `isExpired`). Default.  @param now Timestamp to compare `expiresAt` with. @Default Date.now() |
 | Always | Every fetch trigger. |
 

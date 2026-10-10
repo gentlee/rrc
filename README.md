@@ -460,8 +460,8 @@ But if more control is needed, e.g. checking if entity is full, custom fetch pol
   ...
   getFullUser: {
     query: getUser,
-    fetchPolicy(expired, id, _, {getState}) {
-      if (expired) {
+    fetchPolicy(id, state, {getState}) {
+      if (isExpired(state.expiresAt)) {
         return true // Fetch if expired.
       }
 
@@ -487,8 +487,8 @@ export const UserScreen = () => {
 
   useEffect(() => {
     if (screenIsVisible) {
-      // Expiration happens if expiresAt was set before e.g. by secondsToLive option or invalidateQuery action.
-      // If result is not cached yet, it is also considered as expired.
+      // Fetches only if fetch policy of the query allows it. With default FetchPolicy.NoCacheOrExpired:
+      // if result is not cached yet, or expired (expiresAt can be set by secondsToLive option or invalidateQuery action).
       fetchUser({ onlyIfExpired: true })
     }
   }, [screenIsVisible])

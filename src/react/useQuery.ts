@@ -83,6 +83,7 @@ export const useQuery = <
         onCompleted,
         onSuccess,
         onError,
+        fetchPolicy,
       )
     },
     // No params here to stabilize query, but keeping cacheKey.
@@ -94,6 +95,7 @@ export const useQuery = <
       externalStore,
       secondsToLive,
       getCacheKey,
+      fetchPolicy,
       mergeResults,
       onCompleted,
       onError,
@@ -113,10 +115,8 @@ export const useQuery = <
       return
     }
 
-    const expired = queryState.expiresAt != null && queryState.expiresAt <= Date.now()
     if (
       !fetchPolicy(
-        expired,
         // @ts-expect-error params
         params,
         queryState,
@@ -126,7 +126,6 @@ export const useQuery = <
       logsEnabled &&
         logDebug('useQuery.useEffect skip fetch due to fetch policy', {
           queryState,
-          expired,
           queryKey,
           cacheKey,
         })

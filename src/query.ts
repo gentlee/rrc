@@ -27,6 +27,7 @@ export const query = async <
   onCompleted = cache.config.queries[queryKey].onCompleted,
   onSuccess = cache.config.queries[queryKey].onSuccess,
   onError = cache.config.queries[queryKey].onError,
+  fetchPolicy = cache.config.queries[queryKey].fetchPolicy ?? cache.config.globals.queries.fetchPolicy,
 ): Promise<QueryResult<QK extends keyof (QP | QR) ? QR[QK] : never>> => {
   const {
     config: {
@@ -54,7 +55,15 @@ export const query = async <
     return error ? {cancelled, result, error} : {cancelled, result}
   }
 
-  if (onlyIfExpired && queryStateOnStart?.expiresAt != null && queryStateOnStart.expiresAt > Date.now()) {
+  if (
+    onlyIfExpired &&
+    !fetchPolicy(
+      // @ts-expect-error params
+      params,
+      queryStateOnStart,
+      externalStore,
+    )
+  ) {
     logsEnabled &&
       logDebug(`${logTag} fetch cancelled: not expired yet`, {
         queryStateOnStart,
