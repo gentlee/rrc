@@ -4,8 +4,7 @@ exports.initializeForZustand = void 0;
 const bindAsyncActions_1 = require("../bindAsyncActions");
 const utilsAndConstants_1 = require("../utilsAndConstants");
 const initializeForZustand = (cache, store) => {
-    var _a, _b;
-    var _c;
+    var _a;
     const privateCache = cache;
     const { config: { options: { logsEnabled }, queries, }, reducer, actions, selectors: { selectCacheState }, utils: { getRootState }, } = privateCache;
     const dispatch = (action) => {
@@ -16,11 +15,11 @@ const initializeForZustand = (cache, store) => {
         }
     };
     const innerStore = { dispatch, getState: store.getState };
-    (_a = privateCache.extensions) !== null && _a !== void 0 ? _a : (privateCache.extensions = {});
+    privateCache.extensions ?? (privateCache.extensions = {});
     if (privateCache.extensions.zustand !== undefined) {
         (0, utilsAndConstants_1.logWarn)('initializeForZustand', 'Already initialized for Zustand');
     }
-    (_b = (_c = privateCache.extensions).zustand) !== null && _b !== void 0 ? _b : (_c.zustand = {});
+    (_a = privateCache.extensions).zustand ?? (_a.zustand = {});
     privateCache.extensions.zustand.innerStore = innerStore;
     privateCache.extensions.zustand.externalStore = store;
     logsEnabled && (0, utilsAndConstants_1.logDebug)('initializeForZustand', 'Initialized for Zustand');

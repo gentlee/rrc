@@ -67,8 +67,9 @@ export type Globals<T extends Typenames> = {
     queries: {
         /** Determines when useQuery fetch triggers should start fetching. Fetch is performed if function returns true.
          * Fetch triggers are: 1) mount 2) query or cache key change 3) skipFetch value change to false 4) store change.
+         * Use `isExpired(state.expiresAt)` to check expiration in a custom policy.
          * @Default FetchPolicy.NoCacheOrExpired */
-        fetchPolicy: (expired: boolean, params: unknown, state: QueryState<T, unknown, unknown>, store: AnyStore) => boolean;
+        fetchPolicy: (params: unknown, state: QueryState<T, unknown, unknown>, store: AnyStore) => boolean;
         /** Disables automatic useQuery fetches when true. Manual fetch calls bypass this setting. Hook options override query defaults, which override global defaults. Triggers automatic fetch when changed to false. @Default false */
         skipFetch: boolean;
         /** If set, this value updates expiresAt value of query state when query result is received. @Default undefined */
@@ -123,8 +124,9 @@ export type QueryInfo<T extends Typenames = Typenames, P = unknown, R = unknown>
     query: NormalizedQuery<T, P, R>;
     /** Determines when useQuery fetch triggers should start fetching. Fetch is performed if function returns true.
      * Fetch triggers are: 1) mount 2) query or cache key change 3) skipFetch value change to false 4) store change.
+     * Use `isExpired(state.expiresAt)` to check expiration in a custom policy.
      * @Default FetchPolicy.NoCacheOrExpired */
-    fetchPolicy?: (expired: boolean, params: P, queryState: QueryState<T, P, R>, store: AnyStore) => boolean;
+    fetchPolicy?: (params: P, queryState: QueryState<T, P, R>, store: AnyStore) => boolean;
     /** Merges results before saving to the store. Default implementation is using the latest result. */
     mergeResults?: (oldResult: R | undefined, response: NormalizedQueryResponse<T, R>, params: P | undefined, store: AnyStore) => R;
     /**
@@ -152,7 +154,7 @@ export type QueryState<T extends Typenames = Typenames, P = unknown, R = unknown
     /**
      * Timestamp in milliseconds, after which state is considered expired.
      * Hooks may refetch the query again when component mounts, cache key or skip option change, depending on the fetch policy.
-     * Client query calls also start making fetch if onlyIfExpired argument is truthy.
+     * Client query calls with truthy onlyIfExpired argument also check it using the fetch policy.
      * */
     expiresAt?: number;
 };
@@ -161,7 +163,7 @@ export type UseQueryOptions<T extends Typenames, QK extends keyof (QP & QR), QP,
     params: QK extends keyof (QP | QR) ? QP[QK] : never;
 } & Pick<QueryInfo<T, QK extends keyof (QP | QR) ? QP[QK] : never, QK extends keyof (QP | QR) ? QR[QK] : never>, 'fetchPolicy' | 'skipFetch' | 'secondsToLive' | 'selectorComparer' | 'mergeResults' | 'onCompleted' | 'onSuccess' | 'onError'>;
 export type QueryOptions<T extends Typenames, QP, QR, QK extends keyof (QP & QR)> = Pick<UseQueryOptions<T, QK, QP, QR>, 'query' | 'params' | 'skipFetch' | 'secondsToLive' | 'mergeResults' | 'onCompleted' | 'onSuccess' | 'onError'> & {
-    /** If set to true, query will run only if it is expired or result not yet cached. */
+    /** If set to true, query will run only if fetch policy of the query allows it. With default `FetchPolicy.NoCacheOrExpired` - only if result is expired or not yet cached. */
     onlyIfExpired?: boolean;
 };
 export type QueryResponse<R = unknown> = {

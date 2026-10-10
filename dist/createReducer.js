@@ -1,15 +1,4 @@
 "use strict";
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createReducer = void 0;
 const utilsAndConstants_1 = require("./utilsAndConstants");
@@ -62,7 +51,10 @@ const createReducer = (actions, queryKeys, cacheOptions) => {
             case updateQueryStateAndEntities.type: {
                 const { queryKey, queryCacheKey, state: queryState, entityChanges, } = action;
                 const oldQueryState = state.queries[queryKey][queryCacheKey];
-                let newQueryState = queryState && Object.assign(Object.assign({}, oldQueryState), queryState);
+                let newQueryState = queryState && {
+                    ...oldQueryState,
+                    ...queryState,
+                };
                 if (newQueryState) {
                     if (oldQueryState && deepEqual) {
                         if (newQueryState.params !== oldQueryState.params &&
@@ -79,47 +71,57 @@ const createReducer = (actions, queryKeys, cacheOptions) => {
                             delete newQueryState[key];
                         }
                     }
-                    if (deepEqual === null || deepEqual === void 0 ? void 0 : deepEqual(oldQueryState !== null && oldQueryState !== void 0 ? oldQueryState : utilsAndConstants_1.EMPTY_OBJECT, newQueryState)) {
+                    if (newQueryState.loading === oldQueryState?.loading &&
+                        deepEqual?.(oldQueryState ?? utilsAndConstants_1.EMPTY_OBJECT, newQueryState)) {
                         newQueryState = undefined;
                     }
                 }
                 const newEntities = entityChanges && (0, utilsAndConstants_1.applyEntityChanges)(state.entities, entityChanges, cacheOptions);
                 let newState;
                 if (newEntities) {
-                    newState !== null && newState !== void 0 ? newState : (newState = Object.assign({}, state));
+                    newState ?? (newState = { ...state });
                     newState.entities = newEntities;
                 }
                 if (newQueryState) {
                     if (!(0, utilsAndConstants_1.isEmptyObject)(newQueryState)) {
-                        newState !== null && newState !== void 0 ? newState : (newState = Object.assign({}, state));
+                        newState ?? (newState = { ...state });
                         if (mutable) {
                             newState.queries[queryKey][queryCacheKey] = newQueryState;
                             (0, utilsAndConstants_1.incrementChangeKey)(newState.queries);
                             (0, utilsAndConstants_1.incrementChangeKey)(newState.queries[queryKey]);
                         }
                         else {
-                            newState.queries = Object.assign(Object.assign({}, state.queries), { [queryKey]: Object.assign(Object.assign({}, state.queries[queryKey]), { [queryCacheKey]: newQueryState }) });
+                            newState.queries = {
+                                ...state.queries,
+                                [queryKey]: {
+                                    ...state.queries[queryKey],
+                                    [queryCacheKey]: newQueryState,
+                                },
+                            };
                         }
                     }
                     else if (oldQueryState !== undefined) {
-                        newState !== null && newState !== void 0 ? newState : (newState = Object.assign({}, state));
+                        newState ?? (newState = { ...state });
                         if (mutable) {
                             delete newState.queries[queryKey][queryCacheKey];
                             (0, utilsAndConstants_1.incrementChangeKey)(newState.queries);
                             (0, utilsAndConstants_1.incrementChangeKey)(newState.queries[queryKey]);
                         }
                         else {
-                            const _a = state.queries[queryKey], _b = queryCacheKey, _ = _a[_b], withoutCacheKey = __rest(_a, [typeof _b === "symbol" ? _b : _b + ""]);
-                            newState.queries = Object.assign(Object.assign({}, state.queries), { [queryKey]: withoutCacheKey });
+                            const { [queryCacheKey]: _, ...withoutCacheKey } = state.queries[queryKey];
+                            newState.queries = { ...state.queries, [queryKey]: withoutCacheKey };
                         }
                     }
                 }
-                return newState !== null && newState !== void 0 ? newState : state;
+                return newState ?? state;
             }
             case updateMutationStateAndEntities.type: {
                 const { mutationKey, state: mutationState, entityChanges, } = action;
                 const oldMutationState = state.mutations[mutationKey];
-                let newMutationState = mutationState && Object.assign(Object.assign({}, oldMutationState), mutationState);
+                let newMutationState = mutationState && {
+                    ...oldMutationState,
+                    ...mutationState,
+                };
                 if (newMutationState) {
                     if (oldMutationState && deepEqual) {
                         if (newMutationState.params !== oldMutationState.params &&
@@ -136,44 +138,45 @@ const createReducer = (actions, queryKeys, cacheOptions) => {
                             delete newMutationState[key];
                         }
                     }
-                    if (deepEqual === null || deepEqual === void 0 ? void 0 : deepEqual(oldMutationState !== null && oldMutationState !== void 0 ? oldMutationState : utilsAndConstants_1.EMPTY_OBJECT, newMutationState)) {
+                    if (newMutationState.loading === oldMutationState?.loading &&
+                        deepEqual?.(oldMutationState ?? utilsAndConstants_1.EMPTY_OBJECT, newMutationState)) {
                         newMutationState = undefined;
                     }
                 }
                 const newEntities = entityChanges && (0, utilsAndConstants_1.applyEntityChanges)(state.entities, entityChanges, cacheOptions);
                 let newState;
                 if (newEntities) {
-                    newState = Object.assign(Object.assign({}, state), { entities: newEntities });
+                    newState = { ...state, entities: newEntities };
                 }
                 if (newMutationState) {
                     if (!(0, utilsAndConstants_1.isEmptyObject)(newMutationState)) {
-                        newState !== null && newState !== void 0 ? newState : (newState = Object.assign({}, state));
+                        newState ?? (newState = { ...state });
                         if (mutable) {
                             state.mutations[mutationKey] = newMutationState;
                             (0, utilsAndConstants_1.incrementChangeKey)(state.mutations);
                         }
                         else {
-                            newState.mutations = Object.assign(Object.assign({}, state.mutations), { [mutationKey]: newMutationState });
+                            newState.mutations = { ...state.mutations, [mutationKey]: newMutationState };
                         }
                     }
                     else if (oldMutationState !== undefined) {
-                        newState !== null && newState !== void 0 ? newState : (newState = Object.assign({}, state));
+                        newState ?? (newState = { ...state });
                         if (mutable) {
                             delete state.mutations[mutationKey];
                             (0, utilsAndConstants_1.incrementChangeKey)(state.mutations);
                         }
                         else {
-                            const _c = state.mutations, _d = mutationKey, _ = _c[_d], withoutMutationKey = __rest(_c, [typeof _d === "symbol" ? _d : _d + ""]);
+                            const { [mutationKey]: _, ...withoutMutationKey } = state.mutations;
                             newState.mutations = withoutMutationKey;
                         }
                     }
                 }
-                return newState !== null && newState !== void 0 ? newState : state;
+                return newState ?? state;
             }
             case mergeEntityChanges.type: {
                 const { changes } = action;
                 const newEntities = (0, utilsAndConstants_1.applyEntityChanges)(state.entities, changes, cacheOptions);
-                return newEntities ? Object.assign(Object.assign({}, state), { entities: newEntities }) : state;
+                return newEntities ? { ...state, entities: newEntities } : state;
             }
             case invalidateQuery.type: {
                 const { queries: queriesToInvalidate } = action;
@@ -184,7 +187,7 @@ const createReducer = (actions, queryKeys, cacheOptions) => {
                 let newStatesByQueryKey;
                 const copiedQueryKeys = mutable ? undefined : new Set();
                 for (const { query: queryKey, cacheKey, expiresAt = now } of queriesToInvalidate) {
-                    const statesByCacheKey = (newStatesByQueryKey !== null && newStatesByQueryKey !== void 0 ? newStatesByQueryKey : state.queries)[queryKey];
+                    const statesByCacheKey = (newStatesByQueryKey ?? state.queries)[queryKey];
                     const cacheKeysToInvalidate = cacheKey != null ? [cacheKey] : Reflect.ownKeys(statesByCacheKey);
                     for (const cacheKey of cacheKeysToInvalidate) {
                         if (mutable && cacheKey === '_changeKey') {
@@ -195,28 +198,17 @@ const createReducer = (actions, queryKeys, cacheOptions) => {
                             continue;
                         }
                         if (mutable) {
-                            newStatesByQueryKey !== null && newStatesByQueryKey !== void 0 ? newStatesByQueryKey : (newStatesByQueryKey = state.queries);
+                            newStatesByQueryKey ?? (newStatesByQueryKey = state.queries);
                             (0, utilsAndConstants_1.incrementChangeKey)(newStatesByQueryKey[queryKey]);
                         }
                         else {
-                            newStatesByQueryKey !== null && newStatesByQueryKey !== void 0 ? newStatesByQueryKey : (newStatesByQueryKey = Object.assign({}, state.queries));
+                            newStatesByQueryKey ?? (newStatesByQueryKey = { ...state.queries });
                             if (!copiedQueryKeys.has(queryKey)) {
-                                newStatesByQueryKey[queryKey] = Object.assign({}, newStatesByQueryKey[queryKey]);
+                                newStatesByQueryKey[queryKey] = { ...newStatesByQueryKey[queryKey] };
                                 copiedQueryKeys.add(queryKey);
                             }
                         }
-                        if (expiresAt !== undefined) {
-                            newStatesByQueryKey[queryKey][cacheKey] = Object.assign(Object.assign({}, queryState), { expiresAt });
-                        }
-                        else {
-                            const { expiresAt: _ } = queryState, newQueryState = __rest(queryState, ["expiresAt"]);
-                            if ((0, utilsAndConstants_1.isEmptyObject)(newQueryState)) {
-                                delete newStatesByQueryKey[queryKey][cacheKey];
-                            }
-                            else {
-                                newStatesByQueryKey[queryKey][cacheKey] = newQueryState;
-                            }
-                        }
+                        newStatesByQueryKey[queryKey][cacheKey] = { ...queryState, expiresAt };
                     }
                 }
                 if (!newStatesByQueryKey) {
@@ -225,7 +217,10 @@ const createReducer = (actions, queryKeys, cacheOptions) => {
                 if (mutable) {
                     (0, utilsAndConstants_1.incrementChangeKey)(newStatesByQueryKey);
                 }
-                return Object.assign(Object.assign({}, state), { queries: newStatesByQueryKey });
+                return {
+                    ...state,
+                    queries: newStatesByQueryKey,
+                };
             }
             case clearQueryState.type: {
                 const { queries: queriesToClear } = action;
@@ -235,30 +230,30 @@ const createReducer = (actions, queryKeys, cacheOptions) => {
                 let newStatesByQueryKey;
                 const copiedQueryKeys = mutable ? undefined : new Set();
                 for (const { query: queryKey, cacheKey } of queriesToClear) {
-                    const statesByCacheKey = (newStatesByQueryKey !== null && newStatesByQueryKey !== void 0 ? newStatesByQueryKey : state.queries)[queryKey];
+                    const statesByCacheKey = (newStatesByQueryKey ?? state.queries)[queryKey];
                     if (cacheKey != null) {
                         if (!statesByCacheKey[cacheKey]) {
                             continue;
                         }
                         if (mutable) {
-                            newStatesByQueryKey !== null && newStatesByQueryKey !== void 0 ? newStatesByQueryKey : (newStatesByQueryKey = state.queries);
+                            newStatesByQueryKey ?? (newStatesByQueryKey = state.queries);
                             (0, utilsAndConstants_1.incrementChangeKey)(newStatesByQueryKey[queryKey]);
                         }
                         else {
-                            newStatesByQueryKey !== null && newStatesByQueryKey !== void 0 ? newStatesByQueryKey : (newStatesByQueryKey = Object.assign({}, state.queries));
+                            newStatesByQueryKey ?? (newStatesByQueryKey = { ...state.queries });
                             if (!copiedQueryKeys.has(queryKey)) {
-                                newStatesByQueryKey[queryKey] = Object.assign({}, newStatesByQueryKey[queryKey]);
+                                newStatesByQueryKey[queryKey] = { ...newStatesByQueryKey[queryKey] };
                                 copiedQueryKeys.add(queryKey);
                             }
                         }
                         delete newStatesByQueryKey[queryKey][cacheKey];
                     }
                     else if (mutable) {
-                        newStatesByQueryKey !== null && newStatesByQueryKey !== void 0 ? newStatesByQueryKey : (newStatesByQueryKey = state.queries);
+                        newStatesByQueryKey ?? (newStatesByQueryKey = state.queries);
                         newStatesByQueryKey[queryKey] = {};
                     }
                     else if (statesByCacheKey !== utilsAndConstants_1.EMPTY_OBJECT) {
-                        newStatesByQueryKey !== null && newStatesByQueryKey !== void 0 ? newStatesByQueryKey : (newStatesByQueryKey = Object.assign({}, state.queries));
+                        newStatesByQueryKey ?? (newStatesByQueryKey = { ...state.queries });
                         newStatesByQueryKey[queryKey] = utilsAndConstants_1.EMPTY_OBJECT;
                         copiedQueryKeys.add(queryKey);
                     }
@@ -269,7 +264,10 @@ const createReducer = (actions, queryKeys, cacheOptions) => {
                 if (mutable) {
                     (0, utilsAndConstants_1.incrementChangeKey)(newStatesByQueryKey);
                 }
-                return Object.assign(Object.assign({}, state), { queries: newStatesByQueryKey });
+                return {
+                    ...state,
+                    queries: newStatesByQueryKey,
+                };
             }
             case clearMutationState.type: {
                 const { mutationKeys } = action;
@@ -279,7 +277,7 @@ const createReducer = (actions, queryKeys, cacheOptions) => {
                 let newMutations = undefined;
                 for (const mutation of mutationKeys) {
                     if (state.mutations[mutation]) {
-                        newMutations !== null && newMutations !== void 0 ? newMutations : (newMutations = mutable ? state.mutations : Object.assign({}, state.mutations));
+                        newMutations ?? (newMutations = mutable ? state.mutations : { ...state.mutations });
                         delete newMutations[mutation];
                     }
                 }
@@ -289,13 +287,20 @@ const createReducer = (actions, queryKeys, cacheOptions) => {
                 if (mutable) {
                     (0, utilsAndConstants_1.incrementChangeKey)(newMutations);
                 }
-                return Object.assign(Object.assign({}, state), { mutations: newMutations });
+                return {
+                    ...state,
+                    mutations: newMutations,
+                };
             }
             case clearCache.type: {
                 const { stateToKeep } = action;
                 const initialState = mutable ? getMutableInitialState() : immutableInitialState;
                 return stateToKeep
-                    ? Object.assign(Object.assign({}, initialState), stateToKeep) : initialState;
+                    ? {
+                        ...initialState,
+                        ...stateToKeep,
+                    }
+                    : initialState;
             }
         }
         return state;

@@ -17,12 +17,14 @@ export declare const applyEntityChanges: <T extends Typenames>(entities: Entitie
 export declare const isEmptyObject: (obj: object) => boolean;
 /** Returns query state comparer that compares only provided fields. Used in implementation of `selectorComparer` option. */
 export declare const createStateComparer: <T extends Typenames = Typenames, Q = unknown, P = unknown>(fields: (keyof QueryState<T, Q, P>)[]) => QueryStateComparer<T, Q, P>;
+/** Returns true if `expiresAt` is set and is lower than or equal to `now`. State without `expiresAt` never expires. */
+export declare const isExpired: (expiresAt: number | null | undefined, now?: number) => boolean;
 export declare const FetchPolicy: {
     /**
-     * Only if cache does not exist (result is undefined) or expired. Default.
-     * @param expired `true` when `expiresAt` is defined and lower than `Date.now()`
+     * Only if cache does not exist (result is undefined) or expired (see `isExpired`). Default.
+     * @param now Timestamp to compare `expiresAt` with. @Default Date.now()
      */
-    NoCacheOrExpired: <T extends Typenames = Typenames, P = unknown, R = unknown>(expired: boolean, _params: P, state: QueryState<T, P, R>) => boolean;
+    NoCacheOrExpired: <T extends Typenames = Typenames, P = unknown, R = unknown>(_params: P, state: QueryState<T, P, R>, _store?: unknown, now?: number) => boolean;
     /** Every fetch trigger. */
     Always: () => boolean;
 };

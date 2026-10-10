@@ -49,8 +49,8 @@
   },
   "peerDependencies": {
     "fast-deep-equal": "*",
-    "react": ">=16",
-    "react-redux": ">=4"
+    "react": ">=16.8",
+    "react-redux": ">=7.1"
   },
   "peerDependenciesMeta": {
     "fast-deep-equal": {

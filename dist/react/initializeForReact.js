@@ -7,19 +7,18 @@ const utilsAndConstants_1 = require("../utilsAndConstants");
 const useMutation_1 = require("./useMutation");
 const useQuery_1 = require("./useQuery");
 const initializeForReact = (cache, reduxCustomStoreHooks) => {
-    var _a, _b, _c;
-    var _d;
+    var _a;
     const privateCache = cache;
     const { config: { options, options: { logsEnabled }, }, selectors: { selectEntitiesByTypename, selectEntityById }, } = privateCache;
-    (_a = privateCache.extensions) !== null && _a !== void 0 ? _a : (privateCache.extensions = {});
+    privateCache.extensions ?? (privateCache.extensions = {});
     if (privateCache.extensions.react !== undefined) {
         (0, utilsAndConstants_1.logWarn)('initializeForReact', 'Already initialized for React');
     }
     else {
-        (_b = (_d = privateCache.extensions).react) !== null && _b !== void 0 ? _b : (_d.react = {});
+        (_a = privateCache.extensions).react ?? (_a.react = {});
     }
     const reactExtension = privateCache.extensions.react;
-    (_c = reactExtension.storeHooks) !== null && _c !== void 0 ? _c : (reactExtension.storeHooks = {});
+    reactExtension.storeHooks ?? (reactExtension.storeHooks = {});
     if (reduxCustomStoreHooks !== undefined) {
         if (privateCache.extensions.zustand) {
             throw new Error(`[initializeForReact] Redux custom hooks can't be provided while cache is already initialized for Zustand`);
@@ -44,7 +43,7 @@ const initializeForReact = (cache, reduxCustomStoreHooks) => {
             reactExtension.storeHooks.useSelector = useSelector;
             reactExtension.storeHooks.useExternalStore = useStore;
         }
-        catch (_e) {
+        catch {
             delete privateCache.extensions.react;
             throw new Error("Custom store hooks haven't beed provided, and react-redux package wasn't found");
         }
@@ -65,7 +64,7 @@ const initializeForReact = (cache, reduxCustomStoreHooks) => {
             },
             useEntitiesByTypename: (typename) => {
                 if (options.mutableCollections) {
-                    storeHooks.useSelector((state) => { var _a; return (_a = selectEntitiesByTypename(state, typename)) === null || _a === void 0 ? void 0 : _a._changeKey; });
+                    storeHooks.useSelector((state) => selectEntitiesByTypename(state, typename)?._changeKey);
                 }
                 return storeHooks.useSelector((state) => selectEntitiesByTypename(state, typename));
             },

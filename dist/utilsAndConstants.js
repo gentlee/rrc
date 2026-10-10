@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.incrementChangeKey = exports.FetchPolicy = exports.createStateComparer = exports.isEmptyObject = exports.applyEntityChanges = exports.defaultGetCacheKey = exports.noop = exports.EMPTY_ARRAY = exports.EMPTY_OBJECT = exports.IS_DEV = exports.logWarn = exports.logDebug = exports.optionalUtils = exports.PACKAGE_SHORT_NAME = void 0;
+exports.incrementChangeKey = exports.FetchPolicy = exports.isExpired = exports.createStateComparer = exports.isEmptyObject = exports.applyEntityChanges = exports.defaultGetCacheKey = exports.noop = exports.EMPTY_ARRAY = exports.EMPTY_OBJECT = exports.IS_DEV = exports.logWarn = exports.logDebug = exports.optionalUtils = exports.PACKAGE_SHORT_NAME = void 0;
 exports.PACKAGE_SHORT_NAME = 'rrc';
 exports.optionalUtils = {
     deepEqual: undefined,
@@ -16,15 +16,20 @@ exports.logWarn = logWarn;
 try {
     exports.optionalUtils.deepEqual = require('fast-deep-equal/es6');
 }
-catch (_a) {
+catch {
     (0, exports.logDebug)('deepEqual', 'fast-deep-equal optional dependency was not installed');
 }
 exports.IS_DEV = (() => {
     try {
         return __DEV__;
     }
-    catch (_a) {
-        return process.env.NODE_ENV === 'development';
+    catch {
+        try {
+            return process.env.NODE_ENV === 'development';
+        }
+        catch {
+            return false;
+        }
     }
 })();
 exports.EMPTY_OBJECT = Object.freeze({});
@@ -44,7 +49,6 @@ const defaultGetCacheKey = (params) => {
 };
 exports.defaultGetCacheKey = defaultGetCacheKey;
 const applyEntityChanges = (entities, changes, options) => {
-    var _a, _b;
     if (changes.merge && changes.entities) {
         (0, exports.logWarn)('applyEntityChanges', 'merge and entities should not be both set');
     }
@@ -55,11 +59,11 @@ const applyEntityChanges = (entities, changes, options) => {
     const mutable = options.mutableCollections;
     const deepEqual = options.deepComparisonEnabled ? exports.optionalUtils.deepEqual : undefined;
     let result;
-    const objectWithAllTypenames = Object.assign(Object.assign(Object.assign({}, merge), remove), replace);
+    const objectWithAllTypenames = { ...merge, ...remove, ...replace };
     for (const typename in objectWithAllTypenames) {
-        const entitiesToMerge = merge === null || merge === void 0 ? void 0 : merge[typename];
-        const entitiesToReplace = replace === null || replace === void 0 ? void 0 : replace[typename];
-        const entitiesToRemove = remove === null || remove === void 0 ? void 0 : remove[typename];
+        const entitiesToMerge = merge?.[typename];
+        const entitiesToReplace = replace?.[typename];
+        const entitiesToRemove = remove?.[typename];
         const entitiesToRemoveLength = entitiesToRemove === undefined
             ? 0
             : Array.isArray(entitiesToRemove)
@@ -72,36 +76,36 @@ const applyEntityChanges = (entities, changes, options) => {
             const mergeIds = entitiesToMerge && Object.keys(entitiesToMerge);
             const replaceIds = entitiesToReplace && Object.keys(entitiesToReplace);
             const idsSet = new Set(mergeIds);
-            replaceIds === null || replaceIds === void 0 ? void 0 : replaceIds.forEach((id) => idsSet.add(id));
-            entitiesToRemove === null || entitiesToRemove === void 0 ? void 0 : entitiesToRemove.forEach((id) => idsSet.add(String(id)));
-            const totalKeysInResponse = ((_a = mergeIds === null || mergeIds === void 0 ? void 0 : mergeIds.length) !== null && _a !== void 0 ? _a : 0) + ((_b = replaceIds === null || replaceIds === void 0 ? void 0 : replaceIds.length) !== null && _b !== void 0 ? _b : 0) + entitiesToRemoveLength;
+            replaceIds?.forEach((id) => idsSet.add(id));
+            entitiesToRemove?.forEach((id) => idsSet.add(String(id)));
+            const totalKeysInResponse = (mergeIds?.length ?? 0) + (replaceIds?.length ?? 0) + entitiesToRemoveLength;
             if (totalKeysInResponse !== 0 && idsSet.size !== totalKeysInResponse) {
                 (0, exports.logWarn)('applyEntityChanges', 'merge, replace and remove changes have intersections for: ' + typename);
             }
         }
         const oldEntities = entities[typename];
         let newEntities;
-        entitiesToRemove === null || entitiesToRemove === void 0 ? void 0 : entitiesToRemove.forEach((id) => {
-            if (oldEntities === null || oldEntities === void 0 ? void 0 : oldEntities[id]) {
-                newEntities !== null && newEntities !== void 0 ? newEntities : (newEntities = mutable ? oldEntities : Object.assign({}, oldEntities));
+        entitiesToRemove?.forEach((id) => {
+            if (oldEntities?.[id]) {
+                newEntities ?? (newEntities = mutable ? oldEntities : { ...oldEntities });
                 delete newEntities[id];
             }
         });
         if (entitiesToReplace) {
             for (const id in entitiesToReplace) {
                 const newEntity = entitiesToReplace[id];
-                if (oldEntities === undefined || !(deepEqual === null || deepEqual === void 0 ? void 0 : deepEqual(oldEntities[id], newEntity))) {
-                    newEntities !== null && newEntities !== void 0 ? newEntities : (newEntities = mutable ? (oldEntities !== null && oldEntities !== void 0 ? oldEntities : {}) : Object.assign({}, oldEntities));
+                if (oldEntities === undefined || !deepEqual?.(oldEntities[id], newEntity)) {
+                    newEntities ?? (newEntities = mutable ? (oldEntities ?? {}) : { ...oldEntities });
                     newEntities[id] = newEntity;
                 }
             }
         }
         if (entitiesToMerge) {
             for (const id in entitiesToMerge) {
-                const oldEntity = oldEntities === null || oldEntities === void 0 ? void 0 : oldEntities[id];
-                const newEntity = oldEntity ? Object.assign(Object.assign({}, oldEntity), entitiesToMerge[id]) : entitiesToMerge[id];
-                if (!(deepEqual === null || deepEqual === void 0 ? void 0 : deepEqual(oldEntity, newEntity))) {
-                    newEntities !== null && newEntities !== void 0 ? newEntities : (newEntities = mutable ? (oldEntities !== null && oldEntities !== void 0 ? oldEntities : {}) : Object.assign({}, oldEntities));
+                const oldEntity = oldEntities?.[id];
+                const newEntity = oldEntity ? { ...oldEntity, ...entitiesToMerge[id] } : entitiesToMerge[id];
+                if (!deepEqual?.(oldEntity, newEntity)) {
+                    newEntities ?? (newEntities = mutable ? (oldEntities ?? {}) : { ...oldEntities });
                     newEntities[id] = newEntity;
                 }
             }
@@ -117,7 +121,7 @@ const applyEntityChanges = (entities, changes, options) => {
             }
         }
         else {
-            result !== null && result !== void 0 ? result : (result = Object.assign({}, entities));
+            result ?? (result = { ...entities });
         }
         result[typename] = newEntities;
     }
@@ -156,9 +160,13 @@ const createStateComparer = (fields) => {
     };
 };
 exports.createStateComparer = createStateComparer;
+const isExpired = (expiresAt, now = Date.now()) => {
+    return expiresAt != null && expiresAt <= now;
+};
+exports.isExpired = isExpired;
 exports.FetchPolicy = {
-    NoCacheOrExpired: (expired, _params, state) => {
-        return expired || state.result === undefined;
+    NoCacheOrExpired: (_params, state, _store, now) => {
+        return state.result === undefined || (0, exports.isExpired)(state.expiresAt, now);
     },
     Always: () => true,
 };

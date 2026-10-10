@@ -14,7 +14,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.noop = exports.isEmptyObject = exports.FetchPolicy = exports.defaultGetCacheKey = exports.createStateComparer = exports.withTypenames = exports.createCache = void 0;
+exports.noop = exports.isExpired = exports.isEmptyObject = exports.FetchPolicy = exports.defaultGetCacheKey = exports.createStateComparer = exports.withTypenames = exports.createCache = void 0;
 var createCache_1 = require("./createCache");
 Object.defineProperty(exports, "createCache", { enumerable: true, get: function () { return createCache_1.createCache; } });
 Object.defineProperty(exports, "withTypenames", { enumerable: true, get: function () { return createCache_1.withTypenames; } });
@@ -24,4 +24,5 @@ Object.defineProperty(exports, "createStateComparer", { enumerable: true, get: f
 Object.defineProperty(exports, "defaultGetCacheKey", { enumerable: true, get: function () { return utilsAndConstants_1.defaultGetCacheKey; } });
 Object.defineProperty(exports, "FetchPolicy", { enumerable: true, get: function () { return utilsAndConstants_1.FetchPolicy; } });
 Object.defineProperty(exports, "isEmptyObject", { enumerable: true, get: function () { return utilsAndConstants_1.isEmptyObject; } });
+Object.defineProperty(exports, "isExpired", { enumerable: true, get: function () { return utilsAndConstants_1.isExpired; } });
 Object.defineProperty(exports, "noop", { enumerable: true, get: function () { return utilsAndConstants_1.noop; } });

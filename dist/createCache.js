@@ -8,20 +8,19 @@ const utilsAndConstants_1 = require("./utilsAndConstants");
 const withTypenames = () => {
     return {
         createCache: (partialConfig) => {
-            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
-            var _m, _o, _p, _q, _r, _s, _t;
+            var _a, _b, _c, _d, _e, _f, _g;
             const abortControllers = new WeakMap();
-            (_a = partialConfig.options) !== null && _a !== void 0 ? _a : (partialConfig.options = {});
-            (_b = (_m = partialConfig.options).mutableCollections) !== null && _b !== void 0 ? _b : (_m.mutableCollections = false);
-            (_c = (_o = partialConfig.options).logsEnabled) !== null && _c !== void 0 ? _c : (_o.logsEnabled = false);
-            (_d = (_p = partialConfig.options).additionalValidation) !== null && _d !== void 0 ? _d : (_p.additionalValidation = utilsAndConstants_1.IS_DEV);
-            (_e = (_q = partialConfig.options).deepComparisonEnabled) !== null && _e !== void 0 ? _e : (_q.deepComparisonEnabled = true);
-            (_f = partialConfig.globals) !== null && _f !== void 0 ? _f : (partialConfig.globals = {});
-            (_g = (_r = partialConfig.globals).queries) !== null && _g !== void 0 ? _g : (_r.queries = {});
-            (_h = (_s = partialConfig.globals.queries).fetchPolicy) !== null && _h !== void 0 ? _h : (_s.fetchPolicy = utilsAndConstants_1.FetchPolicy.NoCacheOrExpired);
-            (_j = (_t = partialConfig.globals.queries).skipFetch) !== null && _j !== void 0 ? _j : (_t.skipFetch = false);
-            (_k = partialConfig.mutations) !== null && _k !== void 0 ? _k : (partialConfig.mutations = {});
-            (_l = partialConfig.queries) !== null && _l !== void 0 ? _l : (partialConfig.queries = {});
+            partialConfig.options ?? (partialConfig.options = {});
+            (_a = partialConfig.options).mutableCollections ?? (_a.mutableCollections = false);
+            (_b = partialConfig.options).logsEnabled ?? (_b.logsEnabled = false);
+            (_c = partialConfig.options).additionalValidation ?? (_c.additionalValidation = utilsAndConstants_1.IS_DEV);
+            (_d = partialConfig.options).deepComparisonEnabled ?? (_d.deepComparisonEnabled = true);
+            partialConfig.globals ?? (partialConfig.globals = {});
+            (_e = partialConfig.globals).queries ?? (_e.queries = {});
+            (_f = partialConfig.globals.queries).fetchPolicy ?? (_f.fetchPolicy = utilsAndConstants_1.FetchPolicy.NoCacheOrExpired);
+            (_g = partialConfig.globals.queries).skipFetch ?? (_g.skipFetch = false);
+            partialConfig.mutations ?? (partialConfig.mutations = {});
+            partialConfig.queries ?? (partialConfig.queries = {});
             const config = partialConfig;
             const { globals, cacheStateKey, queries, options } = config;
             const isRootState = cacheStateKey === '.' || cacheStateKey === '';
@@ -83,7 +82,7 @@ const withTypenames = () => {
 };
 exports.withTypenames = withTypenames;
 const setDefaultComparer = (target) => {
-    if ((target === null || target === void 0 ? void 0 : target.selectorComparer) != null && typeof target.selectorComparer === 'object') {
+    if (target?.selectorComparer != null && typeof target.selectorComparer === 'object') {
         target.selectorComparer = (0, utilsAndConstants_1.createStateComparer)(target.selectorComparer);
     }
 };

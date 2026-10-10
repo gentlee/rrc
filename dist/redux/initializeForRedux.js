@@ -21,9 +21,8 @@ const initializeForRedux = (cache) => {
         },
         asyncActions: {
             query: (store, options) => {
-                var _a;
                 const { query: queryKey, params } = options;
-                const getCacheKey = (_a = queries[queryKey].getCacheKey) !== null && _a !== void 0 ? _a : (utilsAndConstants_1.defaultGetCacheKey);
+                const getCacheKey = queries[queryKey].getCacheKey ?? (utilsAndConstants_1.defaultGetCacheKey);
                 const cacheKey = getCacheKey(params);
                 return (0, query_1.query)('asyncActions.query', store, store, privateCache, queryKey, cacheKey, params, options.onlyIfExpired, options.skipFetch, options.secondsToLive, options.mergeResults, options.onCompleted, options.onSuccess, options.onError);
             },
