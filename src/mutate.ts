@@ -82,6 +82,10 @@ export const mutate = async <
     logDebug(`${logTag} finished`, {response, error, aborted: abortController.signal.aborted})
 
   if (abortController.signal.aborted) {
+    // Aborted manually, not by the next mutation which has already replaced the controller.
+    if (abortControllersOfStore[mutationKey] === abortController) {
+      delete abortControllersOfStore[mutationKey]
+    }
     return ABORTED_RESULT
   }
 

@@ -5,6 +5,9 @@ import {Typenames} from '../../types'
 import {logEvent} from '../api/utils'
 import {testCache} from './cache'
 
+/** Stores created in the current test file, used to check for not cleaned abort controllers after all tests. */
+export const createdStores: unknown[] = []
+
 export const createReduxStore = <N extends string, T extends Typenames, QP, QR, MP, MR>(
   {
     config: {name},
@@ -24,6 +27,7 @@ export const createReduxStore = <N extends string, T extends Typenames, QP, QR, 
     })
   }
   const store = createStore(combineReducers({[name]: reducer} as const), applyMiddleware(...middlewares))
+  createdStores.push(store)
   return store
 }
 
