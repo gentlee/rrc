@@ -81,91 +81,103 @@ export const query = async <
     error = e as Error
   }
 
-  if (!error) {
-    innerStore.dispatch(
-      updateQueryStateAndEntities(queryKey as keyof (QP | QR), cacheKey, {
-        loading: fetchPromise,
-        params,
-        error,
-      }),
-    )
+  try {
+    if (!error) {
+      innerStore.dispatch(
+        updateQueryStateAndEntities(queryKey as keyof (QP | QR), cacheKey, {
+          loading: fetchPromise,
+          params,
+          error,
+        }),
+      )
 
-    logsEnabled &&
-      logDebug(`${logTag} started`, {queryKey, params, cacheKey, queryStateOnStart, onlyIfExpired})
+      logsEnabled &&
+        logDebug(`${logTag} started`, {queryKey, params, cacheKey, queryStateOnStart, onlyIfExpired})
 
-    try {
-      response = await fetchPromise
-    } catch (e) {
-      error = e as Error
+      try {
+        response = await fetchPromise
+      } catch (e) {
+        error = e as Error
+      }
     }
-  }
 
-  if (error) {
-    innerStore.dispatch(
-      updateQueryStateAndEntities(queryKey as keyof (QP | QR), cacheKey, {
+    if (error) {
+      innerStore.dispatch(
+        updateQueryStateAndEntities(queryKey as keyof (QP | QR), cacheKey, {
+          error,
+          loading: undefined,
+          params,
+        }),
+      )
+      // @ts-expect-error params
+      if (!onError?.(error, params, externalStore)) {
+        globals.onError?.(
+          error,
+          // @ts-expect-error queryKey
+          queryKey,
+          params,
+          externalStore,
+        )
+      }
+      onCompleted?.(
+        undefined,
         error,
-        loading: undefined,
-        params,
-      }),
-    )
-    // @ts-expect-error params
-    if (!onError?.(error, params, externalStore)) {
-      globals.onError?.(
-        error,
-        // @ts-expect-error queryKey
-        queryKey,
+        // @ts-expect-error params
         params,
         externalStore,
       )
+      return {error, result: selectQueryResult(innerStore.getState(), queryKey, cacheKey)}
     }
-    onCompleted?.(
-      undefined,
-      error,
-      // @ts-expect-error params
-      params,
-      externalStore,
-    )
-    return {error, result: selectQueryResult(innerStore.getState(), queryKey, cacheKey)}
-  }
 
-  if (response) {
-    const newState = {
-      error: undefined,
-      loading: undefined,
-      expiresAt:
-        response.expiresAt ?? (secondsToLive != null ? Date.now() + secondsToLive * 1000 : undefined),
-      result: mergeResults
-        ? mergeResults(
-            // @ts-expect-error fix later
-            selectQueryResult(innerStore.getState(), queryKey, cacheKey),
-            response,
-            params,
-            externalStore,
-          )
-        : response.result,
+    if (response) {
+      const newState = {
+        error: undefined,
+        loading: undefined,
+        expiresAt:
+          response.expiresAt ?? (secondsToLive != null ? Date.now() + secondsToLive * 1000 : undefined),
+        result: mergeResults
+          ? mergeResults(
+              // @ts-expect-error fix later
+              selectQueryResult(innerStore.getState(), queryKey, cacheKey),
+              response,
+              params,
+              externalStore,
+            )
+          : response.result,
+      }
+      innerStore.dispatch(
+        updateQueryStateAndEntities(queryKey as keyof (QP | QR), cacheKey, newState, response),
+      )
+      onSuccess?.(
+        // @ts-expect-error response
+        response,
+        params,
+        externalStore,
+      )
+      onCompleted?.(
+        // @ts-expect-error response
+        response,
+        undefined,
+        params,
+        externalStore,
+      )
+
+      // @ts-expect-error fix types
+      return {result: newState?.result}
     }
-    innerStore.dispatch(
-      updateQueryStateAndEntities(queryKey as keyof (QP | QR), cacheKey, newState, response),
-    )
-    onSuccess?.(
-      // @ts-expect-error response
-      response,
-      params,
-      externalStore,
-    )
-    onCompleted?.(
-      // @ts-expect-error response
-      response,
-      undefined,
-      params,
-      externalStore,
-    )
 
-    // @ts-expect-error fix types
-    return {result: newState?.result}
+    throw new Error(`${logTag}: both error and response are not defined`)
+  } finally {
+    // Reset loading if something threw after the fetch had started (e.g. mergeResults), so the query can be retried.
+    if (
+      fetchPromise !== undefined &&
+      selectQueryState(innerStore.getState(), queryKey, cacheKey).loading === fetchPromise
+    ) {
+      innerStore.dispatch(
+        updateQueryStateAndEntities(queryKey as keyof (QP | QR), cacheKey, {loading: undefined}),
+      )
+    }
   }
-
-  throw new Error(`${logTag}: both error and response are not defined`)
 }
 
 const catchAndReturn = (x: unknown) => x

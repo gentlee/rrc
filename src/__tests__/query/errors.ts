@@ -129,5 +129,12 @@ describe.each(testCaches)('%s query errors', (_, fixture) => {
     expect(onError).not.toHaveBeenCalled()
     expect(globalError).not.toHaveBeenCalled()
     expect(onSuccess).not.toHaveBeenCalled()
+
+    // Loading is reset, so the query is not stuck and can be retried.
+    const state = cache.selectors.selectQueryState(store.getState(), 'load', 1)
+    expect(state.loading).toBeUndefined()
+    expect(state.error).toBeUndefined()
+    expect(await client.query({query: 'load', params: 1})).toEqual({result: 2})
+    expect(onSuccess).toHaveBeenCalledTimes(1)
   })
 })
