@@ -2,7 +2,7 @@
   "name": "rrc",
   "author": "Alexander Danilov",
   "license": "MIT",
-  "version": "0.24.0-rc.0",
+  "version": "0.24.0",
   "description": "Powerful data fetching and caching library for React, Redux and Zustand that supports normalization.",
   "type": "commonjs",
   "main": "./dist/index.js",

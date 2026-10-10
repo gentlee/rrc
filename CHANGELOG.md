@@ -4,6 +4,8 @@ Notable changes of each published version. Breaking changes are listed first.
 
 ## Unreleased
 
+## 0.24.0 - 2026-10-10
+
 ### Breaking changes
 
 - **Fetch policy signature.** The `expired` argument is removed: `fetchPolicy(params, state, store)` instead of `fetchPolicy(expired, params, state, store)`. Use the new `isExpired(state.expiresAt)` util in custom policies:
