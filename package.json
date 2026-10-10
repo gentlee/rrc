@@ -34,18 +34,16 @@
     "clean": "rm -rf dist",
     "lint": "yarn eslint .",
     "lint-fix": "yarn eslint --fix .",
+    "build-lib": "yarn clean && tsc -p tsconfig.build.json && tsc -p tsconfig.build.json --removeComments false --declaration --emitDeclarationOnly",
     "build": "yarn lint && yarn build-lib && yarn size && yarn generate-docs && yarn benchmark",
     "size": "minified-size dist/*.js | grep 'total:' | sed -E 's/.*total: [^,]*, ([^,]*), ([^,]*), ([^,]*).*/<br\\/>minified: \\1<br\\/>gzipped: \\2<br\\/>brotlied: \\3/'",
     "test": "node node_modules/jest/bin/jest.js",
     "health-check": "(cd example && yarn) && yarn sync-example && (cd example && yarn build) && node --test scripts/health-check.mjs",
-    "preminor-rc": "yarn build && npm version preminor --preid rc",
-    "prepatch-rc": "yarn build && npm version prepatch --preid rc",
     "publish-rc": "npm publish --tag rc",
-    "remove-rc": "npm version <same-version-without-rc>",
-    "prepublishOnly": "yarn build && yarn test && yarn health-check",
+    "set-version": "node scripts/set-version.mjs",
+    "prepublishOnly": "yarn lint && yarn build-lib && yarn test && yarn health-check",
     "generate-docs": "node --experimental-strip-types scripts/generate-docs.ts",
-    "benchmark": "NODE_ENV=production node --expose-gc scripts/benchmark.mjs",
-    "build-lib": "yarn clean && tsc -p tsconfig.build.json && tsc -p tsconfig.build.json --removeComments false --declaration --emitDeclarationOnly"
+    "benchmark": "NODE_ENV=production node --expose-gc scripts/benchmark.mjs"
   },
   "peerDependencies": {
     "fast-deep-equal": "*",

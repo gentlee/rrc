@@ -1,0 +1,59 @@
+name: Publish
+
+# Publishes the package to npm when a version tag is pushed (`npm version ...` creates it).
+# Uses npm trusted publishing (OIDC), so no npm token is stored in the repository.
+# The file name is a part of the trusted publisher configuration on npmjs.com.
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  id-token: write # Required for npm trusted publishing
+  contents: write # Required to create the GitHub release
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+          package-manager-cache: false
+
+      - name: Check version and release notes
+        id: release
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+          if [ "v$VERSION" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package version $VERSION"
+            exit 1
+          fi
+          # Fails if CHANGELOG.md has no section for this version.
+          node scripts/release-notes.mjs "$VERSION" > "$RUNNER_TEMP/release-notes.md"
+          case "$VERSION" in
+            *-*) echo "dist_tag=rc" >> "$GITHUB_OUTPUT" ;;
+            *) echo "dist_tag=latest" >> "$GITHUB_OUTPUT" ;;
+          esac
+
+      - run: yarn install --frozen-lockfile
+
+      # prepublishOnly runs lint, build, tests and the health check before the package is published.
+      - name: Publish to npm
+        env:
+          DIST_TAG: ${{ steps.release.outputs.dist_tag }}
+        run: npm publish --tag "$DIST_TAG"
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DIST_TAG: ${{ steps.release.outputs.dist_tag }}
+        run: |
+          if [ "$DIST_TAG" = "latest" ]; then
+            gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes-file "$RUNNER_TEMP/release-notes.md"
+          else
+            gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes-file "$RUNNER_TEMP/release-notes.md" --prerelease
+          fi
