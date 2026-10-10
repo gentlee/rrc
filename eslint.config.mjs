@@ -7,8 +7,6 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import simpleImportSort from 'eslint-plugin-simple-import-sort'
 import globals from 'globals'
 
-const {['AudioWorkletGlobalScope ']: _, ...fixedGlobalsBrowser} = globals.browser
-
 export default [
   globalIgnores(['**/node_modules/**', './example/**', './dist/**']),
   prettier,
@@ -21,7 +19,7 @@ export default [
       globals: {
         ...globals.node,
         ...globals.jest,
-        ...fixedGlobalsBrowser,
+        ...globals.browser,
         __DEV__: true,
       },
     },

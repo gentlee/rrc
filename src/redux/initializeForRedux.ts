@@ -123,7 +123,7 @@ export const initializeForRedux = <N extends string, SK extends string, T extend
         ) as Promise<QueryResult<R>>
       },
       /**
-       * Performs a mutation, aborting previous one with the same mutation key. Returns result only if finished succesfully.
+       * Performs a mutation, aborting previous one with the same mutation key. Returns result only if finished successfully.
        */
       mutate: <MK extends keyof (MP & MR)>(store: ReduxStoreLike, options: MutateOptions<T, MP, MR, MK>) => {
         type R = MK extends keyof (MP | MR) ? MR[MK] : never

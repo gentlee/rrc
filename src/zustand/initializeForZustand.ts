@@ -130,7 +130,7 @@ export const initializeForZustand = <
        * @param skipFetch Fetch is cancelled and current cached result is returned.
        */
       query,
-      /** Performs a mutation, aborting previous one with the same mutation key. Returns result only if finished succesfully. */
+      /** Performs a mutation, aborting previous one with the same mutation key. Returns result only if finished successfully. */
       mutate,
       /** Updates query state, and optionally merges entity changes in a single action. */
       updateQueryStateAndEntities,

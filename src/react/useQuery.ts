@@ -74,7 +74,7 @@ export const useQuery = <
         queryKey,
         // @ts-expect-error fix later
         paramsPassed ? getCacheKey(options.params) : cacheKey,
-        paramsPassed ? options.params! : params, // params type can also have null | undefined, thats why we don't check for it here
+        paramsPassed ? options.params! : params, // params type can also have null | undefined, that's why we don't check for it here
         options?.onlyIfExpired,
         false,
         secondsToLive,

@@ -53,7 +53,7 @@ export type StoreHooks = {
 
 /**
  * Initializes cache to be used with React, creates hooks. Use after initialization for the store.
- * @param reduxCustomStoreHooks Can be used to override defaut redux hooks, imported from "react-redux" package. Not needed for Zustand.
+ * @param reduxCustomStoreHooks Can be used to override default redux hooks, imported from "react-redux" package. Not needed for Zustand.
  */
 export const initializeForReact = <N extends string, SK extends string, T extends Typenames, QP, QR, MP, MR>(
   cache: Cache<N, SK, T, QP, QR, MP, MR>,
@@ -97,7 +97,7 @@ export const initializeForReact = <N extends string, SK extends string, T extend
     reactExtension.storeHooks.useExternalStore = () => externalStore
     logsEnabled && logDebug('initializeForReact', 'Initialized with Zustand store hooks')
   } else {
-    // Try/catch just for bunders like metro to consider this as optional dependency
+    // Try/catch just for bundlers like metro to consider this as optional dependency
     try {
       const useStore = require('react-redux').useStore
       const useSelector = require('react-redux').useSelector
@@ -106,7 +106,7 @@ export const initializeForReact = <N extends string, SK extends string, T extend
       reactExtension.storeHooks.useExternalStore = useStore
     } catch {
       delete privateCache.extensions.react
-      throw new Error("Custom store hooks haven't beed provided, and react-redux package wasn't found")
+      throw new Error("Custom store hooks haven't been provided, and react-redux package wasn't found")
     }
     logsEnabled && logDebug('initializeForReact', 'Initialized with react-redux global hooks')
   }
@@ -117,8 +117,8 @@ export const initializeForReact = <N extends string, SK extends string, T extend
     // doc-header
     hooks: {
       /**
-       * Returns memoized object with query and mutate functions, binded to the store. Memoization dependency is the store.
-       * @warning Not needed for Zustand, its actions are already binded to the store.
+       * Returns memoized object with query and mutate functions, bound to the store. Memoization dependency is the store.
+       * @warning Not needed for Zustand, its actions are already bound to the store.
        */
       useClient: () => {
         const innerStore = storeHooks.useStore()

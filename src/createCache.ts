@@ -255,7 +255,7 @@ const setDefaultComparer = <T extends Typenames, P, R>(
 
 // doc-ignore
 /**
- * Creates cache that handles all logic for fetching and caching queiries and mutations for immutable stores.
+ * Creates cache that handles all logic for fetching and caching queries and mutations for immutable stores.
  * Returns selectors and utils. Should be additionally initialized for the store (Redux or Zustand) and optionally for the UI lib (React).
  * */
 export const createCache = withTypenames().createCache

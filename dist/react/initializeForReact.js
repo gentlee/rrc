@@ -45,7 +45,7 @@ const initializeForReact = (cache, reduxCustomStoreHooks) => {
         }
         catch {
             delete privateCache.extensions.react;
-            throw new Error("Custom store hooks haven't beed provided, and react-redux package wasn't found");
+            throw new Error("Custom store hooks haven't been provided, and react-redux package wasn't found");
         }
         logsEnabled && (0, utilsAndConstants_1.logDebug)('initializeForReact', 'Initialized with react-redux global hooks');
     }

@@ -7,13 +7,13 @@ export type StoreHooks = {
 };
 /**
  * Initializes cache to be used with React, creates hooks. Use after initialization for the store.
- * @param reduxCustomStoreHooks Can be used to override defaut redux hooks, imported from "react-redux" package. Not needed for Zustand.
+ * @param reduxCustomStoreHooks Can be used to override default redux hooks, imported from "react-redux" package. Not needed for Zustand.
  */
 export declare const initializeForReact: <N extends string, SK extends string, T extends Typenames, QP, QR, MP, MR>(cache: Cache<N, SK, T, QP, QR, MP, MR>, reduxCustomStoreHooks?: StoreHooks) => {
     hooks: {
         /**
-         * Returns memoized object with query and mutate functions, binded to the store. Memoization dependency is the store.
-         * @warning Not needed for Zustand, its actions are already binded to the store.
+         * Returns memoized object with query and mutate functions, bound to the store. Memoization dependency is the store.
+         * @warning Not needed for Zustand, its actions are already bound to the store.
          */
         useClient: () => {
             query: <QK extends keyof QP | keyof QR>(options: QueryOptions<T, QP, QR, QK>) => Promise<QueryResult<QK extends keyof QP & keyof QR ? QR[QK] : never>>;

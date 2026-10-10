@@ -44,7 +44,7 @@
 | Symbol | Description |
 |--------|---------------|
 | query | Performs a query using provided options. Deduplicates calls with the same cache key. Always returns current cached result, even when query is cancelled or finished with error.  @param onlyIfExpired When true, cancels fetch if fetch policy of the query returns false. With default policy - if result is cached and not yet expired.  @param skipFetch Fetch is cancelled and current cached result is returned. |
-| mutate | Performs a mutation, aborting previous one with the same mutation key. Returns result only if finished succesfully. |
+| mutate | Performs a mutation, aborting previous one with the same mutation key. Returns result only if finished successfully. |
 | updateQueryStateAndEntities | Updates query state, and optionally merges entity changes in a single action. |
 | updateMutationStateAndEntities | Updates mutation state, and optionally merges entity changes in a single action. |
 | mergeEntityChanges | Merges EntityChanges to the state. |
@@ -77,7 +77,7 @@
 | Symbol | Description |
 |--------|---------------|
 | query | Performs a query using provided options. Deduplicates calls with the same cache key. Always returns current cached result, even when query is cancelled or finished with error.  @param onlyIfExpired When true, cancels fetch if fetch policy of the query returns false. With default policy - if result is cached and not yet expired.  @param skipFetch Fetch is cancelled and current cached result is returned. |
-| mutate | Performs a mutation, aborting previous one with the same mutation key. Returns result only if finished succesfully. |
+| mutate | Performs a mutation, aborting previous one with the same mutation key. Returns result only if finished successfully. |
 
 ##### Utils
 
@@ -90,13 +90,13 @@
 
 | Symbol | Description |
 |--------|---------------|
-| initializeForReact | Initializes cache to be used with React, creates hooks. Use after initialization for the store.  @param reduxCustomStoreHooks Can be used to override defaut redux hooks, imported from "react-redux" package. Not needed for Zustand. |
+| initializeForReact | Initializes cache to be used with React, creates hooks. Use after initialization for the store.  @param reduxCustomStoreHooks Can be used to override default redux hooks, imported from "react-redux" package. Not needed for Zustand. |
 
 ##### Hooks
 
 | Symbol | Description |
 |--------|---------------|
-| useClient | Returns memoized object with query and mutate functions, binded to the store. Memoization dependency is the store.  @warning Not needed for Zustand, its actions are already binded to the store. |
+| useClient | Returns memoized object with query and mutate functions, bound to the store. Memoization dependency is the store.  @warning Not needed for Zustand, its actions are already bound to the store. |
 | useQuery | Fetches query when params change and subscribes to query state changes (subscription depends on `selectorComparer`). |
 | useMutation | Subscribes to provided mutation state and provides mutate function. |
 | useSelectEntityById | useSelector + selectEntityById. |

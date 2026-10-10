@@ -8,7 +8,7 @@ export declare const bindAsyncActions: <N extends string, SK extends string, T e
      */
     query: <QK extends keyof (QP & QR)>(options: QueryOptions<T, QP, QR, QK>) => Promise<QueryResult<QK extends keyof QP & keyof QR ? QR[QK] : never>>;
     /**
-     * Performs a mutation, aborting previous one with the same mutation key. Returns result only if finished succesfully.
+     * Performs a mutation, aborting previous one with the same mutation key. Returns result only if finished successfully.
      */
     mutate: <MK extends keyof (MP & MR)>(options: MutateOptions<T, MP, MR, MK>) => Promise<MutationResult<MK extends keyof MP & keyof MR ? MR[MK] : never>>;
 };

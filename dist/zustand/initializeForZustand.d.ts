@@ -8,7 +8,7 @@ export declare const initializeForZustand: <N extends string, SK extends string,
          * @param skipFetch Fetch is cancelled and current cached result is returned.
          */
         query: <QK extends keyof QP | keyof QR>(options: QueryOptions<T, QP, QR, QK>) => Promise<QueryResult<QK extends keyof QP & keyof QR ? QR[QK] : never>>;
-        /** Performs a mutation, aborting previous one with the same mutation key. Returns result only if finished succesfully. */
+        /** Performs a mutation, aborting previous one with the same mutation key. Returns result only if finished successfully. */
         mutate: <MK extends keyof MP | keyof MR>(options: MutateOptions<T, MP, MR, MK>) => Promise<MutationResult<MK extends keyof MP & keyof MR ? MR[MK] : never>>;
         /** Updates query state, and optionally merges entity changes in a single action. */
         updateQueryStateAndEntities: (queryKey: keyof QP & keyof QR, queryCacheKey: PropertyKey, state?: Partial<QueryState<T, QP[keyof QP & keyof QR], QR[keyof QP & keyof QR]>> | undefined, entityChanges?: EntityChanges<T> | undefined) => void;
