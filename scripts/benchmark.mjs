@@ -1,7 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck fix later
 
-import {createCache} from '../dist/cjs/index.js'
+import {createCache} from '../dist/index.js'
 
 const {reducer: immutableReducer} = createCache({name: 'cache'})
 

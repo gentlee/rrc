@@ -2,6 +2,7 @@
 
 Write documentation, comments, and other repository text in English.
 Use Yarn Classic and keep the existing yarn.lock files.
+Never modify the git index or history unless explicitly asked: no `git add`, `git reset`, `git stash`, or commits. Leave your edits as unstaged working-tree changes, even when other changes in the same files are already staged.
 
 ## Architecture and reference
 
@@ -22,7 +23,7 @@ For a focused test run, append `--runTestsByPath src/__tests__/<file>` to the te
 Markdown-only changes do not require the code checks above.
 
 - `yarn build` also regenerates documentation and runs size measurement and benchmarks. Use the commands above for routine validation.
-- `build-esm` and `build-types` hide compiler output and can mask compiler failures. When changing build configuration, invoke `yarn tsc -p tsconfig.esm.json` and `yarn tsc -p tsconfig.types.json` directly and check their exit codes.
+- When changing build configuration, run `yarn build-lib` and verify the emitted JavaScript and declarations. Build errors must fail the command.
 - `DOCUMENTATION.md` is generated from source comments by `scripts/generate-docs.ts`. Edit the source and run `yarn generate-docs`; its Node runtime must support `--experimental-strip-types`.
 
 ## Cache and tests

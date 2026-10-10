@@ -22,7 +22,7 @@
 |Not over-engineered|Simplicity is the main goal.|
 |Performance|Every function is heavily optimized. Immer is not used ([RTK performance issue](https://github.com/reduxjs/redux-toolkit/issues/4793)). Supports mutable collections (O(n) > O(1)).|
 |Reliability|High test coverage, zero issue policy.|
-|Lightweight|No required dependencies. Module architecture. Tree shaking. `npx minified-size dist/esm/*.js`<br/>minified: 15.3 kB<br/>gzipped: 6.75 kB<br/>brotlied: 5.98 kB|
+|Lightweight|No required dependencies. Module architecture. `npx minified-size dist/*.js`<br/>minified: 20.4 kB<br/>gzipped: 8.03 kB<br/>brotlied: 7.11 kB|
 
 |Feature|Description|
 |--|--|

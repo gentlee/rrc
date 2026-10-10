@@ -4,29 +4,25 @@
   "license": "MIT",
   "version": "0.23.4",
   "description": "Powerful data fetching and caching library for React, Redux and Zustand that supports normalization.",
-  "main": "./dist/cjs/index.js",
-  "module": "./dist/esm/index.js",
-  "types": "./dist/types/index.d.ts",
+  "type": "commonjs",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "require": "./dist/cjs/index.js",
-      "import": "./dist/esm/index.js",
-      "types": "./dist/types/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     },
     "./react": {
-      "require": "./dist/cjs/react/index.js",
-      "import": "./dist/esm/react/index.js",
-      "types": "./dist/types/react/index.d.ts"
+      "types": "./dist/react/index.d.ts",
+      "default": "./dist/react/index.js"
     },
     "./redux": {
-      "require": "./dist/cjs/redux/index.js",
-      "import": "./dist/esm/redux/index.js",
-      "types": "./dist/types/redux/index.d.ts"
+      "types": "./dist/redux/index.d.ts",
+      "default": "./dist/redux/index.js"
     },
     "./zustand": {
-      "require": "./dist/cjs/zustand/index.js",
-      "import": "./dist/esm/zustand/index.js",
-      "types": "./dist/types/zustand/index.d.ts"
+      "types": "./dist/zustand/index.d.ts",
+      "default": "./dist/zustand/index.js"
     },
     "./*": null
   },
@@ -36,12 +32,8 @@
     "clean": "rm -rf dist",
     "lint": "yarn eslint .",
     "lint-fix": "yarn eslint --fix .",
-    "lint-fix-dist": "yarn eslint --quiet --no-ignore --fix dist/ > /dev/null 2>&1 || true",
-    "build-cjs": "tsc -p tsconfig.cjs.json && rm -rf dist/cjs/testing && rm -rf dist/cjs/__tests__",
-    "build-esm": "tsc -p tsconfig.esm.json > /dev/null ; rm -rf dist/esm/testing && rm -rf dist/esm/__tests__",
-    "build-types": "tsc -p tsconfig.types.json > /dev/null ; rm -rf dist/types/testing && rm -rf dist/types/__tests__",
-    "build": "yarn clean && yarn lint && yarn build-cjs && yarn build-esm && yarn build-types && yarn lint-fix-dist && yarn size && yarn generate-docs && yarn benchmark",
-    "size": "npx minified-size dist/esm/*.js | grep 'total:' | sed -E 's/.*total: [^,]*, ([^,]*), ([^,]*), ([^,]*).*/<br\\/>minified: \\1<br\\/>gzipped: \\2<br\\/>brotlied: \\3/'",
+    "build": "yarn lint && yarn build-lib && yarn size && yarn generate-docs && yarn benchmark",
+    "size": "minified-size dist/*.js | grep 'total:' | sed -E 's/.*total: [^,]*, ([^,]*), ([^,]*), ([^,]*).*/<br\\/>minified: \\1<br\\/>gzipped: \\2<br\\/>brotlied: \\3/'",
     "test": "node node_modules/jest/bin/jest.js",
     "preminor-rc": "yarn build && npm version preminor --preid rc",
     "prepatch-rc": "yarn build && npm version prepatch --preid rc",
@@ -49,7 +41,8 @@
     "remove-rc": "npm version <same-version-without-rc>",
     "prepublishOnly": "yarn build && yarn test",
     "generate-docs": "node --experimental-strip-types scripts/generate-docs.ts",
-    "benchmark": "NODE_ENV=production node --expose-gc scripts/benchmark.mjs"
+    "benchmark": "NODE_ENV=production node --expose-gc scripts/benchmark.mjs",
+    "build-lib": "yarn clean && tsc -p tsconfig.build.json && tsc -p tsconfig.build.json --removeComments false --declaration --emitDeclarationOnly"
   },
   "peerDependencies": {
     "fast-deep-equal": "*",
