@@ -396,7 +396,7 @@ If global error handling is needed for errors, not handled by the query / mutati
 export const cache = createCache({
   name: 'cache',
   globals: {
-    onError: (error, key) {
+    onError(error, key) {
       console.log('Not handled error', { error, key })
     }
   },
@@ -418,13 +418,18 @@ export const cache = createCache({
   mutations: {
     updateUser: {
       mutation: updateUser,
-      onSuccess(_, __, {dispatch}, {invalidateQuery}) {
+      onSuccess(_, __, store) {
         // Invalidate getUsers after a single user update (can be done better by updating getUsers state with updateQueryStateAndEntities).
-        dispatch(invalidateQuery([{query: 'getUsers'}]))
+        store.dispatch(invalidateQuery([{query: 'getUsers'}]))
       },
     },
   },
 })
+
+// Actions are returned by store initialization.
+const {
+  actions: {invalidateQuery},
+} = initializeForRedux(cache)
 ```
 
 #### Extended & custom fetch policy

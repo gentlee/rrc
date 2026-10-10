@@ -301,17 +301,7 @@ export const createReducer = <N extends string, T extends Typenames, QP, QR, MP,
               }
             }
 
-            if (expiresAt !== undefined) {
-              newStatesByQueryKey[queryKey][cacheKey] = {...queryState, expiresAt}
-            } else {
-              const {expiresAt: _, ...newQueryState} = queryState
-              if (isEmptyObject(newQueryState)) {
-                delete newStatesByQueryKey[queryKey][cacheKey]
-              } else {
-                // @ts-expect-error fix later
-                newStatesByQueryKey[queryKey][cacheKey] = newQueryState
-              }
-            }
+            newStatesByQueryKey[queryKey][cacheKey] = {...queryState, expiresAt}
           }
         }
 
