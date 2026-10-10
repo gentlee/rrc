@@ -36,7 +36,12 @@ export const IS_DEV: boolean = (() => {
     // @ts-expect-error __DEV__ is only for React Native
     return __DEV__
   } catch {
-    return process.env.NODE_ENV === 'development'
+    try {
+      return process.env.NODE_ENV === 'development'
+    } catch {
+      // Neither __DEV__ nor process.env is available, e.g. in a browser when bundler does not provide them.
+      return false
+    }
   }
 })()
 
