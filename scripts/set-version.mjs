@@ -2,8 +2,10 @@
 // - package.json
 // - CHANGELOG.md: the Unreleased section becomes the section of this version, a new empty Unreleased is added.
 //   Pre-release versions (e.g. 1.2.0-rc.0) keep the Unreleased section, their release notes are taken from it.
-// Does not touch git. Usage: yarn set-version <version>
+// Then commits these two files and creates the `v<version>` tag. Does not push: pushing the tag starts publishing.
+// Usage: yarn set-version <version>
 
+import {execFileSync} from 'node:child_process'
 import {readFileSync, writeFileSync} from 'node:fs'
 import {dirname, join} from 'node:path'
 import {fileURLToPath} from 'node:url'
@@ -12,6 +14,8 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const PACKAGE_PATH = join(ROOT, 'package.json')
 const CHANGELOG_PATH = join(ROOT, 'CHANGELOG.md')
 const UNRELEASED_HEADING = '## Unreleased'
+
+const git = (...args) => execFileSync('git', args, {cwd: ROOT, encoding: 'utf8'}).trim()
 
 const fail = (message) => {
   console.error(message)
@@ -44,6 +48,15 @@ if (!parsedVersion) {
 }
 
 // Validate everything before writing anything.
+
+const tag = `v${version}`
+if (git('tag', '--list', tag) !== '') {
+  fail(`Git tag ${tag} already exists`)
+}
+// Version commit should contain only the version change.
+if (git('status', '--porcelain', '--', 'package.json', 'CHANGELOG.md') !== '') {
+  fail('package.json or CHANGELOG.md have uncommitted changes, commit them first')
+}
 
 const packageText = readFileSync(PACKAGE_PATH, 'utf8')
 const currentVersion = JSON.parse(packageText).version
@@ -96,8 +109,15 @@ if (isPrerelease) {
   console.log(`CHANGELOG.md: "${UNRELEASED_HEADING}" -> "## ${version}"`)
 }
 
+// Commit only these two files, other changes in the working tree and index are left as is.
+
+git('commit', '--quiet', '-m', version, '--', 'package.json', 'CHANGELOG.md')
+git('tag', '--annotate', tag, '-m', version)
+console.log(`Committed as "${version}" and tagged ${tag}`)
+
 console.log(`
-Review the changes, then commit, tag and push to publish:
-  git commit -am "${version}"
-  git tag v${version}
-  git push origin HEAD v${version}`)
+To publish, push the commit with the tag:
+  git push --follow-tags
+
+To undo before pushing:
+  git tag -d ${tag} && git reset HEAD~1 && git checkout -- package.json CHANGELOG.md`)
