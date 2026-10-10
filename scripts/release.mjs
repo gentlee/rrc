@@ -1,9 +1,10 @@
-// Sets the version of the next release in all places where it is written:
-// - package.json
-// - CHANGELOG.md: the Unreleased section becomes the section of this version, a new empty Unreleased is added.
-//   Pre-release versions (e.g. 1.2.0-rc.0) keep the Unreleased section, their release notes are taken from it.
-// Then commits these two files and creates the `v<version>` tag. Does not push: pushing the tag starts publishing.
-// Usage: yarn set-version <version>
+// Releases a new version:
+// 1. Sets the version in package.json.
+// 2. In CHANGELOG.md turns the Unreleased section into the section of this version and adds a new empty Unreleased.
+//    Pre-release versions (e.g. 1.2.0-rc.0) keep the Unreleased section, their release notes are taken from it.
+// 3. Commits these two files and creates the `v<version>` tag.
+// 4. Pushes the current branch with the tag. The pushed tag starts the Publish workflow, which publishes to npm.
+// Usage: yarn release <version>
 
 import {execFileSync} from 'node:child_process'
 import {readFileSync, writeFileSync} from 'node:fs'
@@ -44,7 +45,7 @@ const isHigher = (a, b) => {
 const version = process.argv[2]
 const parsedVersion = version && parseVersion(version)
 if (!parsedVersion) {
-  fail('Usage: yarn set-version <version>, e.g. 1.2.3 or 1.2.3-rc.0')
+  fail('Usage: yarn release <version>, e.g. 1.2.3 or 1.2.3-rc.0')
 }
 
 // Validate everything before writing anything.
@@ -52,6 +53,21 @@ if (!parsedVersion) {
 const tag = `v${version}`
 if (git('tag', '--list', tag) !== '') {
   fail(`Git tag ${tag} already exists`)
+}
+// The branch and the tag are pushed together, so the branch should have an upstream and be up to date with it.
+const branch = git('rev-parse', '--abbrev-ref', 'HEAD')
+if (branch === 'HEAD') {
+  fail('Not on a branch')
+}
+let remote
+try {
+  remote = git('config', `branch.${branch}.remote`)
+} catch {
+  fail(`Branch ${branch} has no upstream to push to`)
+}
+git('fetch', '--quiet', remote)
+if (git('rev-list', '--count', 'HEAD..@{upstream}') !== '0') {
+  fail(`Branch ${branch} is behind ${remote}, pull first`)
 }
 // Version commit should contain only the version change.
 if (git('status', '--porcelain', '--', 'package.json', 'CHANGELOG.md') !== '') {
@@ -115,9 +131,18 @@ git('commit', '--quiet', '-m', version, '--', 'package.json', 'CHANGELOG.md')
 git('tag', '--annotate', tag, '-m', version)
 console.log(`Committed as "${version}" and tagged ${tag}`)
 
-console.log(`
-To publish, push the commit with the tag:
-  git push --follow-tags
+// Push the branch and the tag in a single atomic operation.
 
-To undo before pushing:
+try {
+  execFileSync('git', ['push', '--atomic', remote, branch, tag], {cwd: ROOT, stdio: 'inherit'})
+} catch {
+  fail(`
+Push failed, nothing was published. Retry with:
+  git push --atomic ${remote} ${branch} ${tag}
+
+Or undo the release commit and the tag:
   git tag -d ${tag} && git reset HEAD~1 && git checkout -- package.json CHANGELOG.md`)
+}
+
+console.log(`
+Pushed ${branch} and ${tag} to ${remote}. The Publish workflow publishes the package to npm and creates the GitHub release.`)

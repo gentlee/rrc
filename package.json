@@ -39,7 +39,7 @@
     "size": "minified-size dist/*.js | grep 'total:' | sed -E 's/.*total: [^,]*, ([^,]*), ([^,]*), ([^,]*).*/<br\\/>minified: \\1<br\\/>gzipped: \\2<br\\/>brotlied: \\3/'",
     "test": "node node_modules/jest/bin/jest.js",
     "health-check": "(cd example && yarn) && yarn sync-example && (cd example && yarn build) && node --test scripts/health-check.mjs",
-    "set-version": "node scripts/set-version.mjs",
+    "release": "node scripts/release.mjs",
     "prepublishOnly": "yarn lint && yarn build-lib && yarn test && yarn health-check",
     "generate-docs": "node --experimental-strip-types scripts/generate-docs.ts",
     "benchmark": "NODE_ENV=production node --expose-gc scripts/benchmark.mjs"

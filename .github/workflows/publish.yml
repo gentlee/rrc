@@ -1,6 +1,6 @@
 name: Publish
 
-# Publishes the package to npm when a version tag is pushed (`npm version ...` creates it).
+# Publishes the package to npm when a version tag is pushed (`yarn release <version>` creates and pushes it).
 # Uses npm trusted publishing (OIDC), so no npm token is stored in the repository.
 # The file name is a part of the trusted publisher configuration on npmjs.com.
 

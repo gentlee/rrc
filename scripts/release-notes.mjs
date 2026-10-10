@@ -36,7 +36,7 @@ const notes = getSection(version) ?? (isPrerelease ? getSection('Unreleased') : 
 
 if (!notes) {
   console.error(
-    `CHANGELOG.md has no section "## ${version}". Rename the Unreleased section before publishing a release.`,
+    `CHANGELOG.md has no section "## ${version}". Use "yarn release <version>" to create it from the Unreleased section.`,
   )
   process.exit(1)
 }
