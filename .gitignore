@@ -66,3 +66,6 @@ typings/
 
 # Directory for sources transpiled by babel
 lib
+
+# Build output, built by `yarn build-lib`
+dist

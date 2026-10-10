@@ -23,7 +23,9 @@ For a focused test run, append `--runTestsByPath src/__tests__/<file>` to the te
 Markdown-only changes do not require the code checks above.
 
 - `yarn build` also regenerates documentation and runs size measurement and benchmarks. Use the commands above for routine validation.
+- `dist` is build output and is not committed. `yarn build-lib` creates it; `yarn benchmark` and `yarn size` need it to exist.
 - When changing build configuration, run `yarn build-lib` and verify the emitted JavaScript and declarations. Build errors must fail the command.
+- Add user-facing changes to the `Unreleased` section of `CHANGELOG.md`, breaking changes first.
 - `DOCUMENTATION.md` is generated from source comments by `scripts/generate-docs.ts`. Edit the source and run `yarn generate-docs`; its Node runtime must support `--experimental-strip-types`.
 
 ## Cache and tests
@@ -35,7 +37,7 @@ Markdown-only changes do not require the code checks above.
 ## Example application
 
 - `example/` has separate dependencies and checks. Run `yarn lint` and `yarn build` there when changing it; root lint excludes this directory.
-- The example can use either the published or the local `rrc`. `yarn install` in `example/` installs the version from npm. `yarn sync-example` in the root replaces `example/node_modules/rrc` with a copy of the root `dist` and `package.json`; run `yarn build-lib` first after library changes.
+- The example can use either the published or the local `rrc`. `yarn install` in `example/` installs the version from npm. `yarn sync-example` in the root builds the library and replaces `example/node_modules/rrc` with a copy of the root `dist` and `package.json`.
 - Switching works in both directions: `sync-example` removes the Vite dependency cache and Yarn's integrity file, so the next `yarn install` in `example/` restores the npm version, and the example's `postinstall` removes the Vite cache again.
 - In the root, `yarn example` runs the example with the npm version and `yarn example-dist` with the local build. Both install example dependencies and run its `release` script: a production build served by `vite preview`. Use `yarn dev` in `example/` for the dev server.
 - `yarn health-check` in the root installs example dependencies, syncs the local build into the example, builds it for production and runs `scripts/health-check.mjs`, which loads the built bundle in jsdom and walks through the main screens of every cache variant. It leaves the local copy of `rrc` in the example. It is not part of `yarn test`; `prepublishOnly` runs it after the tests. To check the installed npm version instead, build the example and run `node --test scripts/health-check.mjs`.

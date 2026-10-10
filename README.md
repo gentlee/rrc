@@ -129,7 +129,7 @@
   ```
 </details>
 
-[API Reference](DOCUMENTATION.md)
+[API Reference](DOCUMENTATION.md) · [Changelog](CHANGELOG.md)
     
 ### Table of contents
 

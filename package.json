@@ -30,7 +30,7 @@
   "scripts": {
     "example": "(cd example && yarn && yarn release)",
     "example-dist": "(cd example && yarn) && yarn sync-example && (cd example && yarn release)",
-    "sync-example": "rm -rf example/node_modules/rrc example/node_modules/.vite example/node_modules/.yarn-integrity && mkdir -p example/node_modules/rrc && cp -R dist package.json example/node_modules/rrc",
+    "sync-example": "yarn build-lib && rm -rf example/node_modules/rrc example/node_modules/.vite example/node_modules/.yarn-integrity && mkdir -p example/node_modules/rrc && cp -R dist package.json example/node_modules/rrc",
     "clean": "rm -rf dist",
     "lint": "yarn eslint .",
     "lint-fix": "yarn eslint --fix .",
