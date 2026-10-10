@@ -125,4 +125,16 @@ describe.each([testCaches[1]])('%s', (_, cache, withChangeKey) => {
       }),
     )
   })
+
+  test('should replace loading promise when the rest of the state is deeply equal', () => {
+    const store = createReduxStore(cache, false, false)
+
+    const firstLoading = new Promise<never>(noop)
+    const secondLoading = new Promise<never>(noop)
+
+    store.dispatch(updateQueryStateAndEntities('getUsers', 0, {params: {page: 1}, loading: firstLoading}))
+    store.dispatch(updateQueryStateAndEntities('getUsers', 0, {params: {page: 1}, loading: secondLoading}))
+
+    expect(store.getState().cache.queries.getUsers[0]?.loading).toBe(secondLoading)
+  })
 })

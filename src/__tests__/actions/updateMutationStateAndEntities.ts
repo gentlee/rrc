@@ -114,4 +114,26 @@ describe.each(testCaches)('%s', (_, cache, withChangeKey) => {
       }),
     )
   })
+
+  test('should replace loading promise when the rest of the state is deeply equal', () => {
+    const store = createReduxStore(cache)
+
+    const firstLoading = new Promise<never>(noop)
+    const secondLoading = new Promise<never>(noop)
+
+    store.dispatch(
+      updateMutationStateAndEntities('updateUserNotNormalized', {
+        params: {id: 1, name: '2'},
+        loading: firstLoading,
+      }),
+    )
+    store.dispatch(
+      updateMutationStateAndEntities('updateUserNotNormalized', {
+        params: {id: 1, name: '2'},
+        loading: secondLoading,
+      }),
+    )
+
+    expect(store.getState().cache.mutations.updateUserNotNormalized?.loading).toBe(secondLoading)
+  })
 })

@@ -128,8 +128,11 @@ export const createReducer = <N extends string, T extends Typenames, QP, QR, MP,
             }
           }
 
-          // skip if new state deep equals to the old state
-          if (deepEqual?.(oldQueryState ?? EMPTY_OBJECT, newQueryState)) {
+          // skip if new state deep equals to the old state, loading promise is compared by reference
+          if (
+            newQueryState.loading === oldQueryState?.loading &&
+            deepEqual?.(oldQueryState ?? EMPTY_OBJECT, newQueryState)
+          ) {
             newQueryState = undefined
           }
         }
@@ -214,8 +217,11 @@ export const createReducer = <N extends string, T extends Typenames, QP, QR, MP,
             }
           }
 
-          // skip if new state deep equals to the old state
-          if (deepEqual?.(oldMutationState ?? EMPTY_OBJECT, newMutationState)) {
+          // skip if new state deep equals to the old state, loading promise is compared by reference
+          if (
+            newMutationState.loading === oldMutationState?.loading &&
+            deepEqual?.(oldMutationState ?? EMPTY_OBJECT, newMutationState)
+          ) {
             newMutationState = undefined
           }
         }
