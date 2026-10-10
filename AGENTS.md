@@ -35,4 +35,7 @@ Markdown-only changes do not require the code checks above.
 ## Example application
 
 - `example/` has separate dependencies and checks. Run `yarn lint` and `yarn build` there when changing it; root lint excludes this directory.
-- The example imports a published `rrc` package, with no alias to local library source. To validate local library changes through the example, explicitly connect the local package first.
+- The example can use either the published or the local `rrc`. `yarn install` in `example/` installs the version from npm. `yarn sync-example` in the root replaces `example/node_modules/rrc` with a copy of the root `dist` and `package.json`; run `yarn build-lib` first after library changes.
+- Switching works in both directions: `sync-example` removes the Vite dependency cache and Yarn's integrity file, so the next `yarn install` in `example/` restores the npm version, and the example's `postinstall` removes the Vite cache again.
+- In the root, `yarn example` runs the example with the npm version and `yarn example-dist` with the local build. Both install example dependencies and run its `release` script: a production build served by `vite preview`. Use `yarn dev` in `example/` for the dev server.
+- `yarn health-check` in the root installs example dependencies, syncs the local build into the example, builds it for production and runs `scripts/health-check.mjs`, which loads the built bundle in jsdom and walks through the main screens of every cache variant. It leaves the local copy of `rrc` in the example. It is not part of `yarn test`; `prepublishOnly` runs it after the tests. To check the installed npm version instead, build the example and run `node --test scripts/health-check.mjs`.
