@@ -176,8 +176,8 @@ export const query = async <
     }
 
     throw new Error(`${logTag}: both error and response are not defined`)
-  } finally {
-    // Reset loading if something threw after the fetch had started (e.g. mergeResults), so the query can be retried.
+  } catch (e) {
+    // Something threw after the fetch had started (e.g. mergeResults): reset loading, so the query can be retried.
     if (
       fetchPromise !== undefined &&
       selectQueryState(innerStore.getState(), queryKey, cacheKey).loading === fetchPromise
@@ -186,6 +186,7 @@ export const query = async <
         updateQueryStateAndEntities(queryKey as keyof (QP | QR), cacheKey, {loading: undefined}),
       )
     }
+    throw e
   }
 }
 

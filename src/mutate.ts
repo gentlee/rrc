@@ -150,9 +150,8 @@ export const mutate = async <
     }
 
     throw new Error(`${logTag}: both error and response are not defined`)
-  } finally {
-    // Reset loading if something threw after the mutation had started, so the state does not stay loading forever.
-    // State of the next mutation, which has already replaced the loading promise, is not touched.
+  } catch (e) {
+    // Something threw after the mutation had started: reset loading, so the state does not stay loading forever.
     if (
       mutatePromise !== undefined &&
       selectMutationState(innerStore.getState(), mutationKey).loading === mutatePromise
@@ -161,6 +160,7 @@ export const mutate = async <
         updateMutationStateAndEntities(mutationKey as keyof (MP | MR), {loading: undefined}),
       )
     }
+    throw e
   }
 }
 
