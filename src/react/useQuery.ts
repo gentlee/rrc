@@ -30,7 +30,7 @@ export const useQuery = <
 
   const {
     query: queryKey,
-    skipFetch = queries[queryKey].skipFetch ?? globals.queries.skipFetch ?? false,
+    skipFetch = queries[queryKey].skipFetch ?? globals.queries.skipFetch,
     params,
     selectorComparer,
     secondsToLive,
