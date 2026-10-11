@@ -21,7 +21,7 @@
 |Fully typed|Written in TypeScript, everything is checked by compiler.|
 |Not over-engineered|Simplicity is the main goal.|
 |Performance|Every function is heavily optimized. Immer is not used ([RTK performance issue](https://github.com/reduxjs/redux-toolkit/issues/4793)). Supports mutable collections (O(n) > O(1)).|
-|Reliability|High test coverage, zero issue policy.|
+|Reliability|100% test coverage of statements, branches and functions, enforced by `yarn test-coverage`. Zero issue policy.|
 |Lightweight|No required dependencies. Module architecture. `npx minified-size dist/*.js`<br/>minified: 18.1 kB<br/>gzipped: 7.25 kB<br/>brotlied: 6.44 kB|
 
 |Feature|Description|
