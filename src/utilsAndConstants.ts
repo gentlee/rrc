@@ -142,12 +142,38 @@ export const applyEntityChanges = <T extends Typenames>(
     if (entitiesToMerge) {
       for (const id in entitiesToMerge) {
         const oldEntity = oldEntities?.[id]
-        const newEntity = oldEntity ? {...oldEntity, ...entitiesToMerge[id]} : entitiesToMerge[id]
-        if (!deepEqual?.(oldEntity, newEntity)) {
-          newEntities ??= mutable ? (oldEntities ?? {}) : {...oldEntities}
-          // @ts-expect-error Warning: partial entity possible in the new state after merge
-          newEntities[id] = newEntity
+        const entityToMerge = entitiesToMerge[id]
+
+        let newEntity
+        if (oldEntity) {
+          // Only merged fields are compared, and new entity is not created if all of them are deeply equal.
+          if (deepEqual !== undefined) {
+            let changed = false
+            for (const key in entityToMerge) {
+              const oldValue = oldEntity[key]
+              const newValue = entityToMerge[key]
+              if (
+                oldValue === newValue
+                  ? // Field with undefined value is still added if entity does not have it.
+                    newValue === undefined && !(key in oldEntity)
+                  : !deepEqual(oldValue, newValue)
+              ) {
+                changed = true
+                break
+              }
+            }
+            if (!changed) {
+              continue
+            }
+          }
+          newEntity = {...oldEntity, ...entityToMerge}
+        } else {
+          newEntity = entityToMerge
         }
+
+        newEntities ??= mutable ? (oldEntities ?? {}) : {...oldEntities}
+        // @ts-expect-error Warning: partial entity possible in the new state after merge
+        newEntities[id] = newEntity
       }
     }
 
