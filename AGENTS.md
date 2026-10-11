@@ -21,6 +21,7 @@ yarn test --runInBand
 ```
 
 For a focused test run, append `--runTestsByPath src/__tests__/<file>` to the test command.
+Library sources are covered by tests on 100%. `yarn test-coverage` runs all tests with coverage and fails if any statement, branch or function is not covered; run it when adding or changing library code.
 Markdown-only changes do not require the code checks above.
 
 - `yarn build` also regenerates documentation and runs size measurement and benchmarks. Use the commands above for routine validation.
