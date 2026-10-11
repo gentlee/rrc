@@ -4,6 +4,10 @@ Notable changes of each published version. Breaking changes are listed first.
 
 ## Unreleased
 
+### Fixed
+
+- Mutation stayed in the loading state forever when the mutation function resolved without a response. Loading is now reset, the error is still thrown.
+
 ### Changed
 
 - Merging entities is 1.5-3 times faster: only merged fields are compared with the current entity, and a new entity object is created only if any of them changed.

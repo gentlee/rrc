@@ -131,8 +131,8 @@ describe.each(testCaches)('%s mutation errors', (_, fixture) => {
     expect(privateCache.abortControllers.get(store)?.save).toBeUndefined()
   })
 
-  test('mutation resolved without response throws', async () => {
-    const {client, onError, onSuccess, onCompleted, globalError} = setup(
+  test('mutation resolved without response throws and resets loading', async () => {
+    const {cache, store, client, onError, onSuccess, onCompleted, globalError} = setup(
       mutable,
       // @ts-expect-error mutation should always resolve with response
       async () => undefined,
@@ -142,6 +142,11 @@ describe.each(testCaches)('%s mutation errors', (_, fixture) => {
       'mutate: both error and response are not defined',
     )
 
+    // Loading is reset, so the mutation is not stuck in the loading state.
+    const state = cache.selectors.selectMutationState(store.getState(), 'save')
+    expect(state.loading).toBeUndefined()
+    expect(state.error).toBeUndefined()
+    expect(state.params).toBe(1)
     expect(onError).not.toHaveBeenCalled()
     expect(globalError).not.toHaveBeenCalled()
     expect(onSuccess).not.toHaveBeenCalled()
