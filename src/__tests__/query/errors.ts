@@ -137,4 +137,24 @@ describe.each(testCaches)('%s query errors', (_, fixture) => {
     expect(await client.query({query: 'load', params: 1})).toEqual({result: 2})
     expect(onSuccess).toHaveBeenCalledTimes(1)
   })
+
+  test('query resolved without response throws and resets loading', async () => {
+    const {cache, client, store, onError, onSuccess, onCompleted, globalError} = setup(
+      mutable,
+      // @ts-expect-error query should always resolve with response
+      async () => undefined,
+    )
+
+    await expect(client.query({query: 'load', params: 1})).rejects.toThrow(
+      'query: both error and response are not defined',
+    )
+
+    const state = cache.selectors.selectQueryState(store.getState(), 'load', 1)
+    expect(state.loading).toBeUndefined()
+    expect(state.error).toBeUndefined()
+    expect(onError).not.toHaveBeenCalled()
+    expect(globalError).not.toHaveBeenCalled()
+    expect(onSuccess).not.toHaveBeenCalled()
+    expect(onCompleted).not.toHaveBeenCalled()
+  })
 })

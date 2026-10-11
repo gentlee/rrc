@@ -130,4 +130,21 @@ describe.each(testCaches)('%s mutation errors', (_, fixture) => {
     expect(await second).toEqual({result: 2})
     expect(privateCache.abortControllers.get(store)?.save).toBeUndefined()
   })
+
+  test('mutation resolved without response throws', async () => {
+    const {client, onError, onSuccess, onCompleted, globalError} = setup(
+      mutable,
+      // @ts-expect-error mutation should always resolve with response
+      async () => undefined,
+    )
+
+    await expect(client.mutate({mutation: 'save', params: 1})).rejects.toThrow(
+      'mutate: both error and response are not defined',
+    )
+
+    expect(onError).not.toHaveBeenCalled()
+    expect(globalError).not.toHaveBeenCalled()
+    expect(onSuccess).not.toHaveBeenCalled()
+    expect(onCompleted).not.toHaveBeenCalled()
+  })
 })
