@@ -3,6 +3,7 @@
 Write documentation, comments, and other repository text in English.
 Use Yarn Classic and keep the existing yarn.lock files.
 Never modify the git index or history unless explicitly asked: no `git add`, `git reset`, `git stash`, or commits. Leave your edits as unstaged working-tree changes, even when other changes in the same files are already staged.
+When asked to commit, write the message as a single subject line without a body: `<Type>: <what changed>`, where type is `Add`, `Update`, `Fix` or `Remove`. Join several parts with `;`, e.g. `Update: optimize merging of entities; Add: merge benchmark and tests`. Do not add `Co-Authored-By` or any other attribution lines.
 
 ## Architecture and reference
 
