@@ -4,6 +4,8 @@ Notable changes of each published version. Breaking changes are listed first.
 
 ## Unreleased
 
+## 0.24.1 - 2026-10-12
+
 ### Fixed
 
 - Mutation stayed in the loading state forever when the mutation function resolved without a response. Loading is now reset, the error is still thrown.
