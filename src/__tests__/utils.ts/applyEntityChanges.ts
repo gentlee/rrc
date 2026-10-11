@@ -47,6 +47,26 @@ describe.each(testCaches)('%s', (_, cache, withChangeKey) => {
     )
   })
 
+  test('remove entities provided as Set', () => {
+    const entitiesMap = generateTestEntitiesMap(2)
+
+    const result = applyEntityChanges(entitiesMap, {
+      remove: {users: new Set([0, 5]), banks: new Set<string>()},
+    })
+
+    expect(result!.users).toStrictEqual(withChangeKey(0, {1: generateTestUser(1)}))
+    expect(result!.banks).toStrictEqual({0: generateTestBank('0'), 1: generateTestBank('1')})
+  })
+
+  test('replace creates collection if there are no entities of that typename yet', () => {
+    const user = generateTestUser(0)
+
+    const result = applyEntityChanges({}, {replace: {users: {0: user}}})
+
+    expect(result).toStrictEqual(withChangeKey(0, {users: withChangeKey(0, {0: user})}))
+    expect(result!.users![0]).toBe(user)
+  })
+
   test.each(['merge', 'entities'] as const)('update entities via %s', (field) => {
     const entitiesMap = generateTestEntitiesMap(2)
     const changes: EntityChanges<TestTypenames> = {
